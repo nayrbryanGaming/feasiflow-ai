@@ -4,7 +4,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "env": {
-    "PYTHON_BACKEND_URL": "@python-backend-url"
+    "PYTHON_BACKEND_URL": "https://feasiflow-backend.railway.app"
   },
   "headers": [
     {
