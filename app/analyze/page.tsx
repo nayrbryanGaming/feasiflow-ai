@@ -90,7 +90,7 @@ export default function AnalyzePage() {
         <div className="text-center mb-10">
           <a href="/" className="text-blue-400 text-sm hover:text-blue-300 mb-4 inline-block">← Kembali ke Beranda</a>
           <h1 className="text-3xl font-black">Analisis Kelayakan Startup</h1>
-          <p className="text-gray-400 mt-2">Isi 11 parameter untuk memulai analisis 6-agen</p>
+          <p className="text-gray-400 mt-2">Isi parameter untuk memulai analisis 9-agen · 7 sifat penilaian · 7 metode scraping</p>
         </div>
 
         {/* Progress */}
