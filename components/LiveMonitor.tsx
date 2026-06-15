@@ -26,44 +26,93 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
   const [overallProgress, setOverallProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    const sse = new EventSource(`/api/stream/${sessionId}`);
+    // Read cached params from sessionStorage
+    let params: unknown = null;
+    try {
+      const raw = sessionStorage.getItem(`params_${sessionId}`);
+      if (raw) params = JSON.parse(raw);
+    } catch { /* ignore */ }
 
-    sse.onmessage = (e) => {
+    if (!params) {
+      setErrorMsg("Parameter analisis tidak ditemukan. Silakan mulai analisis baru.");
+      setHasError(true);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    (async () => {
       try {
-        const event: AgentEvent = JSON.parse(e.data);
-        setOverallProgress(event.progress);
-
-        setAgentStates((prev) => {
-          const next = { ...prev };
-          const agent = event.agent;
-          if (event.event === "agent_start") {
-            next[agent] = { ...next[agent], status: "running" };
-          } else if (event.event === "agent_done") {
-            next[agent] = {
-              status: "done",
-              elapsed: event.elapsed_seconds,
-              tokens: event.tokens_used,
-            };
-          } else if (event.event === "agent_error") {
-            next[agent] = { ...next[agent], status: "error" };
-            setHasError(true);
-          } else if (event.event === "complete") {
-            next[agent] = { ...next[agent], status: "done" };
-            setIsComplete(true);
-            sse.close();
-            if (event.data) onComplete(event.data as AnalysisResult);
-          }
-          return next;
+        const res = await fetch("/api/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ params, sessionId }),
+          signal: controller.signal,
         });
-      } catch {
-        // ignore parse errors
-      }
-    };
 
-    sse.onerror = () => sse.close();
-    return () => sse.close();
+        if (!res.ok || !res.body) {
+          const errText = await res.text().catch(() => "Unknown error");
+          setErrorMsg(`Error: ${errText}`);
+          setHasError(true);
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          // SSE format: "data: {...}\n\n"
+          const parts = buffer.split("\n\n");
+          buffer = parts.pop() ?? "";
+
+          for (const part of parts) {
+            const line = part.trim();
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const event: AgentEvent = JSON.parse(line.slice(6));
+              setOverallProgress(event.progress);
+
+              setAgentStates((prev) => {
+                const next = { ...prev };
+                const agent = event.agent;
+                if (event.event === "agent_start") {
+                  next[agent] = { ...next[agent], status: "running" };
+                } else if (event.event === "agent_done") {
+                  next[agent] = {
+                    status: "done",
+                    elapsed: event.elapsed_seconds,
+                    tokens: event.tokens_used,
+                  };
+                } else if (event.event === "agent_error") {
+                  next[agent] = { ...next[agent], status: "error" };
+                  setHasError(true);
+                } else if (event.event === "complete") {
+                  next[agent] = { ...next[agent], status: "done" };
+                  setIsComplete(true);
+                  if (event.data) onComplete(event.data as AnalysisResult);
+                }
+                return next;
+              });
+            } catch { /* ignore SSE parse errors */ }
+          }
+        }
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          setErrorMsg(String(err));
+          setHasError(true);
+        }
+      }
+    })();
+
+    return () => controller.abort();
   }, [sessionId, onComplete]);
 
   return (
@@ -118,6 +167,9 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
                   <Clock size={11} />{formatElapsed(elapsed)}
                 </span>
               )}
+              {tokens != null && tokens > 0 && (
+                <span className="text-[10px] text-gray-600">{tokens}t</span>
+              )}
             </div>
           );
         })}
@@ -131,9 +183,12 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
       )}
 
       {hasError && !isComplete && (
-        <div className="mt-5 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center">
-          <p className="text-yellow-400 font-semibold text-sm">⚠️ Beberapa agen mengalami error</p>
-          <p className="text-gray-400 text-xs mt-1">Analisis dilanjutkan dengan data terbaik</p>
+        <div className="mt-5 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
+          <p className="text-red-400 font-semibold text-sm">❌ Error</p>
+          {errorMsg && <p className="text-gray-400 text-xs mt-1">{errorMsg}</p>}
+          <a href="/analyze" className="mt-2 inline-block text-xs text-blue-400 underline">
+            Mulai Analisis Baru
+          </a>
         </div>
       )}
     </div>

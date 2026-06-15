@@ -10,10 +10,12 @@ export async function startAnalysis(params: StartupParameters): Promise<{ sessio
     const err = await res.json().catch(() => ({ error: "Unknown error" }));
     throw new Error(err.error || "Failed to start analysis");
   }
-  return res.json();
-}
-
-export async function getResult(sessionId: string): Promise<Record<string, unknown>> {
-  const res = await fetch(`/api/result/${sessionId}`);
-  return res.json();
+  const data: { sessionId: string } = await res.json();
+  // Cache params so LiveMonitor can POST them to /api/run
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.setItem(`params_${data.sessionId}`, JSON.stringify(params));
+    } catch { /* quota exceeded or private browsing */ }
+  }
+  return data;
 }

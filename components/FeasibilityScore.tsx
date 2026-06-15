@@ -64,7 +64,7 @@ export function FeasibilityScore({ data }: { data: FScore }) {
     },
   ];
 
-  const gonogo = data?.go_nogo_recommendation
+  const gonogo = (data as any)?.go_nogo_recommendation
     ?? (total >= 75 ? "GO" : total >= 55 ? "CONDITIONAL GO" : "NO-GO");
 
   const weakest = data?.weakest_dimension;
