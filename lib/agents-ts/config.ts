@@ -1,20 +1,35 @@
 // Groq client for the 9-agent TypeScript pipeline.
 //
-// Institutional "go green" policy → EXACTLY ONE Groq API call per agent:
-//   • No fallback / retry double-calls.
-//   • Calls are serialized and token-rate-gated using Groq's own
-//     `x-ratelimit-*` response headers, so we never hit a 429 in the first
-//     place — which is what makes a single call per agent reliable.
+// Goal: original PARALLEL setup, using BOTH API keys, reliable under ~5
+// concurrent testers. Groq rate limits are per-ORG-per-MODEL, and the two
+// keys share one org — so the lever for concurrency is spreading calls across
+// MODELS (each model has its own token bucket) + retrying a 429 on a DIFFERENT
+// model bucket. Happy path is still ONE call per agent (go-green); retries only
+// fire under genuine rate contention so concurrent runs still finish.
 
-// Single model: supports JSON mode, highest free-tier budget (~12k TPM).
-export const MODEL = "llama-3.3-70b-versatile";
+// Reliable JSON-mode models (Llama family — no hidden "reasoning" that breaks
+// response_format:json_object, unlike gpt-oss / qwen3). Each has its own
+// per-org token bucket. TPM verified via x-ratelimit-limit-tokens:
+//   llama-3.3-70b 12k · llama-4-scout 30k · llama-3.1-8b 6k  → 48k aggregate.
+const MODELS = {
+  best: "llama-3.3-70b-versatile",                       // 12k TPM, top quality
+  big: "meta-llama/llama-4-scout-17b-16e-instruct",      // 30k TPM, big bucket
+  fast: "llama-3.1-8b-instant",                          // 6k TPM, overflow
+} as const;
+
+// Weighted initial pick: load tracks quality first, capacity as overflow.
+const MODEL_POOL = [MODELS.best, MODELS.big, MODELS.best, MODELS.big, MODELS.fast];
+// Distinct buckets for retry rotation after a 429.
+const DISTINCT_MODELS = [MODELS.best, MODELS.big, MODELS.fast];
+
+const MAX_RETRIES = 6;
 
 // ── API keys ─────────────────────────────────────────────────────────────────
-// GROQ_API_KEY may hold several keys (comma / whitespace separated); we
-// round-robin across them. NOTE: keys from the SAME Groq account share one
-// org-wide rate-limit pool, so extra keys only add headroom if they come from
-// DIFFERENT accounts. Stray BOM / non-ASCII chars are stripped — a leading
-// U+FEFF makes fetch throw "Cannot convert argument to a ByteString ... 65279".
+// GROQ_API_KEY may hold several keys (comma / whitespace separated); round-robin
+// across them. NOTE: keys from the SAME Groq account share one org rate-limit
+// pool, so extra keys only add headroom if from DIFFERENT accounts. Stray BOM /
+// non-ASCII chars are stripped — a leading U+FEFF makes fetch throw
+// "Cannot convert argument to a ByteString ... value 65279".
 function getKeys(): string[] {
   const raw = process.env.GROQ_API_KEY ?? "";
   const keys = raw
@@ -24,94 +39,69 @@ function getKeys(): string[] {
   if (keys.length === 0) throw new Error("GROQ_API_KEY not set");
   return keys;
 }
-let keyIndex = 0;
 
-// ── Serialized, rate-gated execution ─────────────────────────────────────────
-// All callGroq() invocations queue through `chain` so only one HTTP request is
-// in flight at a time; the gate then keeps us under the per-minute token cap.
-let chain: Promise<unknown> = Promise.resolve();
-let remainingTokens = Number.POSITIVE_INFINITY; // from last response headers
-let resetMs = 0;
+let modelCounter = 0;
+let keyCounter = 0;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-function parseDurationMs(s: string | null): number {
-  if (!s) return 0;
-  let ms = 0;
-  const min = s.match(/([\d.]+)m(?!s)/);
-  const sec = s.match(/([\d.]+)s/);
-  const mil = s.match(/([\d.]+)ms/);
-  if (min) ms += parseFloat(min[1]) * 60000;
-  if (sec) ms += parseFloat(sec[1]) * 1000;
-  if (mil) ms += parseFloat(mil[1]);
-  return ms;
-}
-
-function estimateTokens(messages: { content: string }[], maxTokens: number): number {
-  const chars = messages.reduce((n, m) => n + m.content.length, 0);
-  return Math.ceil(chars / 3) + maxTokens; // generous upper bound: input + max output
-}
-
-async function rateGate(est: number): Promise<void> {
-  // If the remaining per-minute token budget can't cover this call, wait for
-  // the bucket to refill before sending it (no extra API call is made).
-  if (remainingTokens < est) {
-    await sleep(resetMs + 400);
-    remainingTokens = Number.POSITIVE_INFINITY;
-    resetMs = 0;
-  }
+// Fast first (rotation usually finds a free bucket), longer if all are saturated.
+function backoffMs(attempt: number): number {
+  const ladder = [400, 1000, 2000, 4000, 8000, 12000];
+  return ladder[attempt] ?? 12000;
 }
 
 export async function callGroq(
   messages: { role: "system" | "user" | "assistant"; content: string }[],
   opts: { temperature?: number; maxTokens?: number; jsonMode?: boolean } = {}
 ): Promise<{ content: string; tokens: number }> {
-  const run = chain.then(() => doCall(messages, opts));
-  // Keep the queue alive even if this call rejects.
-  chain = run.then(() => undefined, () => undefined);
-  return run;
-}
-
-async function doCall(
-  messages: { role: "system" | "user" | "assistant"; content: string }[],
-  opts: { temperature?: number; maxTokens?: number; jsonMode?: boolean }
-): Promise<{ content: string; tokens: number }> {
   const { temperature = 0.7, maxTokens = 4096, jsonMode = true } = opts;
   const keys = getKeys();
-  const apiKey = keys[keyIndex++ % keys.length];
+  const startModel = modelCounter++;
+  let lastErr: unknown;
 
-  await rateGate(estimateTokens(messages, maxTokens));
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    // Attempt 0: weighted pool. Retries: rotate across distinct model buckets.
+    const model =
+      attempt === 0
+        ? MODEL_POOL[startModel % MODEL_POOL.length]
+        : DISTINCT_MODELS[(startModel + attempt) % DISTINCT_MODELS.length];
+    const apiKey = keys[keyCounter++ % keys.length];
 
-  const body: Record<string, unknown> = {
-    model: MODEL,
-    messages,
-    temperature,
-    max_tokens: maxTokens,
-  };
-  if (jsonMode) body.response_format = { type: "json_object" };
+    const body: Record<string, unknown> = { model, messages, temperature, max_tokens: maxTokens };
+    if (jsonMode) body.response_format = { type: "json_object" };
 
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+    let res: Response;
+    try {
+      res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      lastErr = e; // network hiccup → retry
+      await sleep(backoffMs(attempt));
+      continue;
+    }
 
-  // Update the token budget from Groq's own accounting so the next call's gate
-  // is accurate. This is what prevents the 429 instead of reacting to it.
-  const rem = res.headers.get("x-ratelimit-remaining-tokens");
-  const rst = res.headers.get("x-ratelimit-reset-tokens");
-  if (rem !== null) remainingTokens = parseFloat(rem);
-  if (rst !== null) resetMs = parseDurationMs(rst);
+    // Rate-limited / transient → wait briefly, then retry on a different bucket.
+    if (res.status === 429 || res.status === 500 || res.status === 502 || res.status === 503) {
+      lastErr = new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 140)}`);
+      await sleep(backoffMs(attempt));
+      continue;
+    }
+    if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
 
-  if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
-  const data = (await res.json()) as any;
-  return {
-    content: data.choices[0].message.content as string,
-    tokens: data.usage?.total_tokens ?? 0,
-  };
+    const data = (await res.json()) as any;
+    const content = data?.choices?.[0]?.message?.content;
+    if (typeof content !== "string" || !content.trim()) {
+      lastErr = new Error("Groq: empty content");
+      await sleep(backoffMs(attempt));
+      continue;
+    }
+    return { content, tokens: data.usage?.total_tokens ?? 0 };
+  }
+  throw lastErr ?? new Error("Groq: exhausted retries");
 }
 
 export function stripThink(content: string): string {
