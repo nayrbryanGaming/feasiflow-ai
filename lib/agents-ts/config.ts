@@ -14,15 +14,19 @@
 const MODELS = {
   best: "llama-3.3-70b-versatile",                       // 12k TPM, top quality
   big: "meta-llama/llama-4-scout-17b-16e-instruct",      // 30k TPM, big bucket
-  fast: "llama-3.1-8b-instant",                          // 6k TPM, overflow
+  fast: "llama-3.1-8b-instant",                          // 6k TPM
+  ossBig: "openai/gpt-oss-120b",                         // 8k TPM, overflow only
+  ossSmall: "openai/gpt-oss-20b",                        // 8k TPM, overflow only
 } as const;
 
-// Weighted initial pick: load tracks quality first, capacity as overflow.
+// Attempt 0 (normal path): reliable JSON-mode Llama models only, weighted so
+// load tracks quality first then capacity. One call per agent lands here.
 const MODEL_POOL = [MODELS.best, MODELS.big, MODELS.best, MODELS.big, MODELS.fast];
-// Distinct buckets for retry rotation after a 429.
-const DISTINCT_MODELS = [MODELS.best, MODELS.big, MODELS.fast];
+// Retry rotation after a 429: all 5 distinct buckets (~64k TPM aggregate) so a
+// burst of concurrent calls can always find free capacity somewhere.
+const DISTINCT_MODELS = [MODELS.best, MODELS.big, MODELS.ossBig, MODELS.ossSmall, MODELS.fast];
 
-const MAX_RETRIES = 6;
+const MAX_RETRIES = 8;
 
 // ── API keys ─────────────────────────────────────────────────────────────────
 // GROQ_API_KEY may hold several keys (comma / whitespace separated); round-robin
@@ -47,8 +51,18 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Fast first (rotation usually finds a free bucket), longer if all are saturated.
 function backoffMs(attempt: number): number {
-  const ladder = [400, 1000, 2000, 4000, 8000, 12000];
-  return ladder[attempt] ?? 12000;
+  const ladder = [400, 800, 1500, 3000, 5000, 8000, 12000, 15000];
+  return ladder[attempt] ?? 15000;
+}
+
+// How long Groq says to wait, from the retry-after header or the 429 body
+// ("Please try again in 17.46s"). Capped so a single agent never stalls a run.
+function retryAfterMs(res: Response, bodyText: string): number {
+  const h = res.headers.get("retry-after");
+  if (h && !Number.isNaN(parseFloat(h))) return Math.min(15000, parseFloat(h) * 1000);
+  const m = bodyText.match(/try again in ([\d.]+)s/i);
+  if (m) return Math.min(15000, parseFloat(m[1]) * 1000);
+  return 0;
 }
 
 export async function callGroq(
@@ -84,13 +98,23 @@ export async function callGroq(
       continue;
     }
 
-    // Rate-limited / transient → wait briefly, then retry on a different bucket.
-    if (res.status === 429 || res.status === 500 || res.status === 502 || res.status === 503) {
-      lastErr = new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 140)}`);
-      await sleep(backoffMs(attempt));
-      continue;
+    if (!res.ok) {
+      const text = await res.text();
+      // Retryable: rate limit / transient 5xx, or a gpt-oss overflow model that
+      // couldn't emit valid JSON (json_validate_failed) — rotate to another bucket.
+      const retryable =
+        res.status === 429 ||
+        res.status === 500 ||
+        res.status === 502 ||
+        res.status === 503 ||
+        (res.status === 400 && text.includes("json_validate_failed"));
+      if (retryable && attempt < MAX_RETRIES) {
+        lastErr = new Error(`Groq ${res.status}: ${text.slice(0, 140)}`);
+        await sleep(Math.max(backoffMs(attempt), retryAfterMs(res, text)));
+        continue;
+      }
+      throw new Error(`Groq ${res.status}: ${text.slice(0, 200)}`);
     }
-    if (!res.ok) throw new Error(`Groq ${res.status}: ${await res.text()}`);
 
     const data = (await res.json()) as any;
     const content = data?.choices?.[0]?.message?.content;
