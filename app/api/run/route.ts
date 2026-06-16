@@ -14,6 +14,13 @@ import { runRecommendation } from "@/lib/agents-ts/recommendation";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes (Vercel Pro/Hobby streaming)
 
+// ── Admission control (antrian) ──────────────────────────────────────────────
+// Cap concurrent pipelines so each running analysis keeps enough Groq token
+// budget to finish within the 300s limit. Over capacity → 503 and the client
+// waits in a queue + retries, which also staggers spikes into spread-out load.
+const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT_RUNS ?? 5);
+let activeRuns = 0;
+
 // Map form params to agent params
 function toAgentParams(p: StartupParameters): StartupParams {
   const startup_name = p.topicSubField || p.ideaDescription.slice(0, 60).trim();
@@ -56,6 +63,15 @@ export async function POST(request: Request) {
   if (!formParams?.industryCategory || !formParams?.ideaDescription) {
     return NextResponse.json({ error: "Parameter tidak lengkap" }, { status: 400 });
   }
+
+  // At capacity → tell the client to wait in the antrian and retry shortly.
+  if (activeRuns >= MAX_CONCURRENT) {
+    return NextResponse.json(
+      { queued: true, active: activeRuns, capacity: MAX_CONCURRENT, message: "Sistem sibuk — Anda dalam antrian." },
+      { status: 503, headers: { "Retry-After": "5" } }
+    );
+  }
+  activeRuns++;
 
   const agentParams = toAgentParams(formParams);
   const startTime = Date.now();
@@ -249,6 +265,7 @@ export async function POST(request: Request) {
     } catch (err) {
       emit({ event: "agent_error", agent: currentAgent, progress, message: String(err) });
     } finally {
+      activeRuns = Math.max(0, activeRuns - 1); // release the antrian slot
       try { controller.close(); } catch { /* already closed */ }
     }
   })();

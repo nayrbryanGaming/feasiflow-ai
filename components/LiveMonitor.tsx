@@ -27,6 +27,8 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
   const [isComplete, setIsComplete] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isQueued, setIsQueued] = useState(false);
+  const [queuePos, setQueuePos] = useState<number | null>(null);
 
   useEffect(() => {
     // Read cached params from sessionStorage
@@ -46,12 +48,26 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
 
     (async () => {
       try {
-        const res = await fetch("/api/run", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ params, sessionId }),
-          signal: controller.signal,
-        });
+        // Queue-aware start: if the server is at capacity it replies 503; we
+        // wait in the antrian and retry until a slot frees (no hard error).
+        let res: Response;
+        for (;;) {
+          res = await fetch("/api/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ params, sessionId }),
+            signal: controller.signal,
+          });
+          if (res.status !== 503) break;
+          let info: { active?: number; capacity?: number } = {};
+          try { info = await res.json(); } catch { /* ignore */ }
+          setIsQueued(true);
+          setQueuePos(Math.max(1, (info.active ?? 0) - (info.capacity ?? 0) + 1));
+          const retryAfter = Number(res.headers.get("Retry-After") ?? 5);
+          await new Promise((r) => setTimeout(r, (retryAfter + Math.random() * 2) * 1000));
+          if (controller.signal.aborted) return;
+        }
+        setIsQueued(false);
 
         if (!res.ok || !res.body) {
           const errText = await res.text().catch(() => "Unknown error");
@@ -130,6 +146,21 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
           style={{ width: `${overallProgress}%` }}
         />
       </div>
+
+      {/* Antrian (queue) banner */}
+      {isQueued && !isComplete && (
+        <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-center">
+          <p className="text-yellow-300 font-semibold text-sm flex items-center justify-center gap-2">
+            <Loader2 size={14} className="animate-spin" /> Antrian — menunggu giliran…
+          </p>
+          {queuePos != null && (
+            <p className="text-gray-400 text-xs mt-1">Perkiraan posisi: #{queuePos}</p>
+          )}
+          <p className="text-gray-500 text-[11px] mt-1">
+            Analisis dimulai otomatis saat slot tersedia.
+          </p>
+        </div>
+      )}
 
       {/* Agents */}
       <div className="space-y-2">
