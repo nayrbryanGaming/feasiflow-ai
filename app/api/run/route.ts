@@ -69,6 +69,7 @@ export async function POST(request: Request) {
 
   const enc = new TextEncoder();
   let progress = 0;
+  let currentAgent = "orchestrator";
   let controller!: ReadableStreamDefaultController<Uint8Array>;
 
   // Accumulated results
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
 
   const agentStart = (agent: string, p: number) => {
     progress = p;
+    currentAgent = agent;
     emit({ event: "agent_start", agent, progress });
   };
 
@@ -245,7 +247,7 @@ export async function POST(request: Request) {
 
       emit({ event: "complete", agent: "recommendation", progress: 100, data: results });
     } catch (err) {
-      emit({ event: "agent_error", agent: "recommendation", progress, message: String(err) });
+      emit({ event: "agent_error", agent: currentAgent, progress, message: String(err) });
     } finally {
       try { controller.close(); } catch { /* already closed */ }
     }

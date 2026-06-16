@@ -94,6 +94,7 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
                 } else if (event.event === "agent_error") {
                   next[agent] = { ...next[agent], status: "error" };
                   setHasError(true);
+                  if (event.message) setErrorMsg(event.message);
                 } else if (event.event === "complete") {
                   next[agent] = { ...next[agent], status: "done" };
                   setIsComplete(true);

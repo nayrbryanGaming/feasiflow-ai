@@ -339,6 +339,7 @@ export interface AgentEvent {
   data?: Partial<AnalysisResult> | Record<string, unknown>;
   elapsed_seconds?: number;
   tokens_used?: number;
+  message?: string;
 }
 
 // ── UI Display Helpers ────────────────────────────────────────────────────────

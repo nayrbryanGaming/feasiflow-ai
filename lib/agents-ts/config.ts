@@ -1,16 +1,23 @@
 // Groq TypeScript client for Edge Runtime
 // Used by all 9 agents in the TypeScript pipeline
 
-export const PRIMARY_MODEL = "deepseek-r1-distill-llama-70b";
-export const FALLBACK_MODEL = "llama-3.3-70b-versatile";
+// NOTE: deepseek-r1-distill-llama-70b was decommissioned by Groq (model_decommissioned).
+// Both models below are current production Groq models that support JSON mode.
+export const PRIMARY_MODEL = "llama-3.3-70b-versatile";
+export const FALLBACK_MODEL = "openai/gpt-oss-120b";
 
 export async function callGroq(
   messages: { role: "system" | "user" | "assistant"; content: string }[],
   opts: { temperature?: number; maxTokens?: number; jsonMode?: boolean } = {}
 ): Promise<{ content: string; tokens: number }> {
   const { temperature = 0.7, maxTokens = 4096, jsonMode = true } = opts;
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY not set");
+  const rawKey = process.env.GROQ_API_KEY;
+  if (!rawKey) throw new Error("GROQ_API_KEY not set");
+  // Strip BOM (U+FEFF) / zero-width / stray whitespace that can sneak into env vars
+  // (e.g. a key pasted from a UTF-8-BOM file). A non-ASCII char in the Authorization
+  // header makes fetch throw "Cannot convert argument to a ByteString ... value 65279".
+  const apiKey = rawKey.replace(/[^\x20-\x7E]/g, "").trim();
+  if (!apiKey) throw new Error("GROQ_API_KEY is empty after sanitizing");
 
   const body: Record<string, unknown> = {
     model: PRIMARY_MODEL,
