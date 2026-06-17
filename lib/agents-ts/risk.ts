@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import type { StartupParams } from "./orchestrator";
 
 const SYSTEM_PROMPT = `Anda adalah Risk Assessment Intelligence Agent AI untuk startup Indonesia.
@@ -8,7 +8,7 @@ Catatan: risk_score dikurangi dari 100 untuk skor final (risiko rendah = skor ti
 Output JSON dengan keys: overall_risk_score, risk_level (Low/Medium/High/Critical),
 dimensions (object dengan 4 keys, masing-masing {score, level, risks: [{risk, probability, impact, mitigation}]}),
 top_3_critical_risks (array string), risk_breakdown (object {financial, market, operational, regulatory}),
-runway_estimate, risk_summary, mitigation_priority.`;
+runway_estimate, risk_summary, mitigation_priority.` + CRITICAL_SCORING_GUIDE;
 
 export async function runRisk(
   params: StartupParams,

@@ -14,7 +14,7 @@ export function MarketChart({ market }: { market: AnalysisResult["market"] }) {
 
   return (
     <div className="glass-card rounded-2xl p-6">
-      <h2 className="text-xl font-bold mb-5">📈 Market Research</h2>
+      <h2 className="text-xl font-bold mb-5">Market Research</h2>
 
       <p className="text-gray-300 text-sm mb-6">{toText(market?.market_overview)}</p>
 
@@ -51,7 +51,7 @@ export function MarketChart({ market }: { market: AnalysisResult["market"] }) {
         <div className="space-y-2">
           {trends.map((t, i) => (
             <div key={i} className="flex gap-2 text-sm text-gray-300">
-              <span className="text-blue-400 mt-0.5">▸</span>{t}
+              <span className="text-blue-400 mt-0.5"></span>{t}
             </div>
           ))}
         </div>
@@ -71,7 +71,7 @@ export function MarketChart({ market }: { market: AnalysisResult["market"] }) {
 
       {market?.regulatory_environment && (
         <div className="mt-4 p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
-          <p className="text-xs text-yellow-400 font-semibold mb-1">⚖️ Regulasi</p>
+          <p className="text-xs text-yellow-400 font-semibold mb-1">Regulasi</p>
           <p className="text-xs text-gray-400">{toText(market.regulatory_environment)}</p>
         </div>
       )}

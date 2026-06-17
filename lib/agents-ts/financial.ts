@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import type { StartupParams } from "./orchestrator";
 
 // Benchmark finansial per kategori (dalam IDR)
@@ -32,7 +32,7 @@ SEMUA nilai keuangan dalam RUPIAH (IDR).
 Output JSON dengan keys: financial_sustainability_score, capital_idr, monthly_burn_rate_idr,
 runway_months, break_even_estimate_months, projected_revenue_year1_idr, projected_revenue_year3_idr,
 cac_estimate_idr, ltv_estimate_idr, ltv_cac_ratio, gross_margin_pct, dimension_scores (7 keys),
-funding_recommendation, financial_red_flags (array), financial_strengths (array), financial_summary.`;
+funding_recommendation, financial_red_flags (array), financial_strengths (array), financial_summary.` + CRITICAL_SCORING_GUIDE;
 
 export async function runFinancial(
   params: StartupParams,

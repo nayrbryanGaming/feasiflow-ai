@@ -42,10 +42,7 @@ export function SentimentPanel({ sentiment }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <span className="text-2xl">💬</span>
-            <span>Sentiment &amp; Social Intelligence</span>
-          </h3>
+          <h3 className="text-lg font-bold">Sentiment &amp; Social Intelligence</h3>
           <p className="text-gray-400 text-xs mt-1">
             7 metode scraping real-time · Validasi demand publik
           </p>
@@ -95,7 +92,7 @@ export function SentimentPanel({ sentiment }: Props) {
         {/* Pain Point Evidence */}
         {painPoints.length > 0 && (
           <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
-            <p className="text-xs font-bold text-red-400 mb-2">🔴 Bukti Pain Point Nyata</p>
+            <p className="text-xs font-bold text-red-400 mb-2">Bukti Pain Point Nyata</p>
             <ul className="space-y-1">
               {painPoints.map((e, i) => (
                 <li key={i} className="text-xs text-gray-300 flex gap-1.5">
@@ -109,7 +106,7 @@ export function SentimentPanel({ sentiment }: Props) {
         {/* Positive Signals */}
         {positives.length > 0 && (
           <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
-            <p className="text-xs font-bold text-green-400 mb-2">🟢 Sinyal Positif</p>
+            <p className="text-xs font-bold text-green-400 mb-2">Sinyal Positif</p>
             <ul className="space-y-1">
               {positives.map((s, i) => (
                 <li key={i} className="text-xs text-gray-300 flex gap-1.5">
@@ -124,7 +121,7 @@ export function SentimentPanel({ sentiment }: Props) {
       {/* Key Insight */}
       {sentiment.key_insight && (
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-4">
-          <p className="text-xs font-bold text-blue-400 mb-1">💡 Key Insight</p>
+          <p className="text-xs font-bold text-blue-400 mb-1">Key Insight</p>
           <p className="text-sm text-gray-200">{toText(sentiment.key_insight)}</p>
         </div>
       )}
@@ -132,7 +129,7 @@ export function SentimentPanel({ sentiment }: Props) {
       {/* Target Community */}
       {sentiment.target_community && (
         <div className="flex gap-2 items-start text-xs text-gray-400 mb-3">
-          <span className="text-purple-400 shrink-0">👥</span>
+          <span className="text-purple-400 shrink-0"></span>
           <span><strong className="text-gray-300">Early Adopter Target:</strong> {toText(sentiment.target_community)}</span>
         </div>
       )}

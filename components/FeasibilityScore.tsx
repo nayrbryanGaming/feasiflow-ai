@@ -16,7 +16,7 @@ export function FeasibilityScore({ data }: { data: FScore }) {
   const scoreBg = getScoreBg(total);
   const scoreBorder = getScoreBorder(total);
 
-  // ── 7 Sifat Penilaian dengan bobot baru ───────────────────────────────────
+  // 7 Sifat Penilaian dengan bobot baru
   const bars = [
     {
       label: "Validasi Pasar",
@@ -75,6 +75,11 @@ export function FeasibilityScore({ data }: { data: FScore }) {
   const weakest = toText(data?.weakest_dimension);
   const strongest = toText(data?.strongest_dimension);
 
+  const si = data?.scenario_impact;
+  const baseScore = num(si?.base_score) || total;
+  const penalty = Math.max(0, Math.round((baseScore - total) * 10) / 10);
+  const qualityReason = toText(data?.confidence_reasoning);
+
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
@@ -96,7 +101,7 @@ export function FeasibilityScore({ data }: { data: FScore }) {
             gonogo === "CONDITIONAL GO" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" :
             "bg-red-500/20 text-red-400 border-red-500/30"
           }`}>
-            {gonogo === "GO" ? "🚀 GO" : gonogo === "CONDITIONAL GO" ? "⚡ CONDITIONAL GO" : "🛑 NO-GO"}
+            {gonogo === "GO" ? "GO" : gonogo === "CONDITIONAL GO" ? "CONDITIONAL GO" : "NO-GO"}
           </span>
         </div>
 
@@ -105,6 +110,9 @@ export function FeasibilityScore({ data }: { data: FScore }) {
           <p className="text-xs text-gray-500 mt-3">
             Kepercayaan analisis: <span className="text-gray-300 font-medium capitalize">{toText(data.confidence_level)}</span>
           </p>
+        )}
+        {qualityReason && (
+          <p className="text-xs text-gray-400 mt-2 max-w-xl mx-auto leading-relaxed">{qualityReason}</p>
         )}
       </div>
 
@@ -132,45 +140,42 @@ export function FeasibilityScore({ data }: { data: FScore }) {
         ))}
       </div>
 
-      {/* Formula display */}
-      <div className="bg-gray-800/50 rounded-xl p-3 mb-4 text-xs">
-        <p className="text-gray-500 mb-1 font-bold">Formula:</p>
+      {/* Formula + transparent quality penalty */}
+      <div className="bg-gray-800/50 rounded-xl p-4 mb-4 text-xs space-y-1.5">
+        <p className="text-gray-500 font-bold uppercase tracking-wider">Cara skor dihitung</p>
         <p className="text-gray-400 font-mono leading-relaxed">
-          Skor = (Market×0.20) + (BM×0.18) + (Risk×0.17) +<br/>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(CA×0.15) + (Fin×0.12) + (Demand×0.10) + (Reg×0.08)
+          Skor tertimbang = Market·0.20 + BM·0.18 + Risk·0.17 + CA·0.15 + Fin·0.12 + Demand·0.10 + Reg·0.08
         </p>
-        <p className="text-gray-300 font-mono mt-1">= {total}</p>
+        <div className="flex justify-between pt-1 border-t border-gray-700/50">
+          <span className="text-gray-400">Skor tertimbang (mentah)</span>
+          <span className="text-gray-200 font-mono font-bold">{baseScore}</span>
+        </div>
+        {penalty > 0 && (
+          <div className="flex justify-between text-rose-300">
+            <span>Penalti kualitas input</span>
+            <span className="font-mono font-bold">− {penalty}</span>
+          </div>
+        )}
+        <div className="flex justify-between pt-1 border-t border-gray-700/50">
+          <span className="text-gray-300 font-semibold">Skor final</span>
+          <span className={`font-mono font-black ${scoreColor}`}>{total} / 100</span>
+        </div>
       </div>
 
       {/* Weakest & Strongest */}
       {(weakest || strongest) && (
-        <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="grid grid-cols-2 gap-2">
           {strongest && (
-            <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-3">
-              <p className="text-xs text-green-400 font-bold mb-1">💪 Terkuat</p>
+            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
+              <p className="text-xs text-emerald-400 font-bold mb-1">Dimensi Terkuat</p>
               <p className="text-xs text-gray-300">{strongest}</p>
             </div>
           )}
           {weakest && (
-            <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-3">
-              <p className="text-xs text-red-400 font-bold mb-1">⚠️ Terlemah</p>
+            <div className="bg-rose-500/5 border border-rose-500/20 rounded-lg p-3">
+              <p className="text-xs text-rose-400 font-bold mb-1">Dimensi Terlemah</p>
               <p className="text-xs text-gray-300">{weakest}</p>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Scenario impact */}
-      {data?.scenario_impact && data.scenario_impact.delta !== 0 && (
-        <div className="mt-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-sm">
-          <p className="text-blue-400 font-semibold mb-1">Dampak Skenario Dinamis</p>
-          <p className="text-gray-400">
-            Base: <b>{data.scenario_impact.base_score}</b> →
-            Delta: <b className="text-blue-400">{data.scenario_impact.delta > 0 ? "+" : ""}{data.scenario_impact.delta}</b> →
-            Final: <b className={scoreColor}>{data.scenario_impact.with_scenarios}</b>
-          </p>
-          {data.scenario_impact.active_scenarios?.length > 0 && (
-            <p className="text-xs text-gray-500 mt-1">Skenario: {data.scenario_impact.active_scenarios.join(", ")}</p>
           )}
         </div>
       )}

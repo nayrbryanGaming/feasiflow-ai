@@ -209,14 +209,14 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
 
       {isComplete && (
         <div className="mt-5 p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-center">
-          <p className="text-green-400 font-semibold text-sm">✅ Analisis Selesai!</p>
+          <p className="text-green-400 font-semibold text-sm">Analisis Selesai!</p>
           <p className="text-gray-400 text-xs mt-1">Scroll ke bawah untuk laporan lengkap</p>
         </div>
       )}
 
       {hasError && !isComplete && (
         <div className="mt-5 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
-          <p className="text-red-400 font-semibold text-sm">❌ Error</p>
+          <p className="text-red-400 font-semibold text-sm">Error</p>
           {errorMsg && <p className="text-gray-400 text-xs mt-1">{errorMsg}</p>}
           <a href="/analyze" className="mt-2 inline-block text-xs text-blue-400 underline">
             Mulai Analisis Baru

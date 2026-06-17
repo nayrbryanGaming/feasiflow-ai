@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import { search, formatResults } from "./search";
 import type { StartupParams } from "./orchestrator";
 
@@ -10,7 +10,7 @@ Output JSON dengan keys: direct_competitors (array dari {name, description, stre
 funding_status, estimated_market_share}), indirect_competitors (array),
 competitive_advantage_score, our_differentiation, competitive_moat,
 competition_intensity, market_gaps (array), recommended_positioning,
-entry_barriers (array), competitive_risks (array).`;
+entry_barriers (array), competitive_risks (array).` + CRITICAL_SCORING_GUIDE;
 
 export async function runCompetitor(
   params: StartupParams,

@@ -32,7 +32,7 @@ export class PanelBoundary extends Component<Props, State> {
       return (
         <div className="glass-card rounded-2xl p-5 border border-yellow-500/20">
           <p className="text-sm font-semibold text-yellow-300">
-            ⚠️ {this.props.name ?? "Bagian ini"} tidak dapat ditampilkan
+            {this.props.name ?? "Bagian ini"} tidak dapat ditampilkan
           </p>
           <p className="text-xs text-gray-500 mt-1">
             Data dari AI untuk bagian ini berformat tak terduga, jadi dilewati. Bagian lain tetap tampil normal.

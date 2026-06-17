@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import { search, formatResults } from "./search";
 import type { StartupParams } from "./orchestrator";
 
@@ -78,7 +78,7 @@ viral_potential, community_strength, regulatory_acceptance.
 Berikan validated_demand_score (0-100) sebagai bobot 10% dari skor final.
 Output JSON dengan keys: validated_demand_score, sentiment_breakdown (object dengan 7 dimensi),
 overall_sentiment, social_proof_indicators (array), demand_signals (array),
-negative_signals (array), sentiment_trend, scraping_methods_used (array).`;
+negative_signals (array), sentiment_trend, scraping_methods_used (array).` + CRITICAL_SCORING_GUIDE;
 
 export async function runSentiment(
   params: StartupParams,

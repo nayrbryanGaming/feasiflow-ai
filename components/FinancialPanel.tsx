@@ -8,13 +8,13 @@ interface Props {
 }
 
 const FIN_DIM_CONFIG: Record<string, { label: string; icon: string }> = {
-  capital_sufficiency: { label: "Kecukupan Modal", icon: "🏦" },
-  revenue_model_clarity: { label: "Kejelasan Model Revenue", icon: "💡" },
-  gross_margin_health: { label: "Kesehatan Gross Margin", icon: "📊" },
-  cash_efficiency: { label: "Efisiensi Penggunaan Modal", icon: "⚡" },
-  break_even_achievability: { label: "Ketercapaian Break Even", icon: "🎯" },
-  funding_pathway: { label: "Akses ke Funding Berikutnya", icon: "🚀" },
-  unit_economics_viability: { label: "Viabilitas Unit Economics", icon: "🔢" },
+  capital_sufficiency: { label: "Kecukupan Modal", icon: "" },
+  revenue_model_clarity: { label: "Kejelasan Model Revenue", icon: "" },
+  gross_margin_health: { label: "Kesehatan Gross Margin", icon: "" },
+  cash_efficiency: { label: "Efisiensi Penggunaan Modal", icon: "" },
+  break_even_achievability: { label: "Ketercapaian Break Even", icon: "" },
+  funding_pathway: { label: "Akses ke Funding Berikutnya", icon: "" },
+  unit_economics_viability: { label: "Viabilitas Unit Economics", icon: "" },
 };
 
 function RunwayGauge({ months }: { months: number }) {
@@ -48,10 +48,7 @@ export function FinancialPanel({ financial }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <span className="text-2xl">💰</span>
-            <span>Financial Modeling</span>
-          </h3>
+          <h3 className="text-lg font-bold">Financial Modeling</h3>
           <p className="text-gray-400 text-xs mt-1">
             Proyeksi keuangan · Unit economics · Runway
           </p>
@@ -66,7 +63,7 @@ export function FinancialPanel({ financial }: Props) {
       {/* Runway Projection */}
       {runway && (
         <div className="bg-gray-800/60 rounded-xl p-4 mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">📊 Proyeksi Runway</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Proyeksi Runway</p>
           <div className="grid grid-cols-3 gap-3 mb-3">
             <div className="text-center">
               <p className="text-xs text-gray-500">Modal Awal</p>
@@ -90,7 +87,7 @@ export function FinancialPanel({ financial }: Props) {
       {/* Revenue Projection */}
       {financial.revenue_projection && (
         <div className="mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">📈 Proyeksi Revenue</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Proyeksi Revenue</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {[
               { label: "Bulan 3", value: financial.revenue_projection.month_3 },
@@ -123,7 +120,7 @@ export function FinancialPanel({ financial }: Props) {
               return (
                 <div key={key}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-300">{cfg.icon} {cfg.label}</span>
+                    <span className="text-xs text-gray-300">{cfg.label}</span>
                     <span className={`text-xs font-bold ${dimScore >= 70 ? "text-green-400" : dimScore >= 50 ? "text-yellow-400" : "text-red-400"}`}>
                       {dimScore}
                     </span>
@@ -143,7 +140,7 @@ export function FinancialPanel({ financial }: Props) {
         {/* Cost Structure */}
         {financial.cost_structure && (
           <div className="bg-gray-800/40 rounded-xl p-4">
-            <p className="text-xs font-bold text-gray-400 mb-2">🏗️ Struktur Biaya</p>
+            <p className="text-xs font-bold text-gray-400 mb-2">Struktur Biaya</p>
             {fixedCosts.length > 0 && (
               <>
                 <p className="text-xs text-gray-500 mb-1">Fixed Costs:</p>
@@ -163,7 +160,7 @@ export function FinancialPanel({ financial }: Props) {
         {/* Funding Recommendation */}
         {financial.funding_recommendation && (
           <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
-            <p className="text-xs font-bold text-blue-400 mb-2">🚀 Rekomendasi Pendanaan</p>
+            <p className="text-xs font-bold text-blue-400 mb-2">Rekomendasi Pendanaan</p>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between">
                 <span className="text-gray-500">Jenis:</span>
@@ -193,7 +190,7 @@ export function FinancialPanel({ financial }: Props) {
       {/* Financial Risks */}
       {financialRisks.length > 0 && (
         <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 mb-4">
-          <p className="text-xs font-bold text-red-400 mb-2">⚠️ Risiko Finansial</p>
+          <p className="text-xs font-bold text-red-400 mb-2">Risiko Finansial</p>
           {financialRisks.map((r, i) => (
             <p key={i} className="text-xs text-gray-300 mb-1 flex gap-1.5">
               <span className="text-red-400 shrink-0">!</span>{r}

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { LiveMonitor } from "@/components/LiveMonitor";
 import { FeasibilityScore } from "@/components/FeasibilityScore";
 import { BMCDisplay } from "@/components/BMCDisplay";
@@ -16,9 +17,6 @@ import { PanelBoundary } from "@/components/PanelBoundary";
 import { toTextList } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/types";
 
-// Loading placeholder emoji set (9 agents)
-const AGENT_EMOJIS = ["🧠", "📊", "📈", "🔍", "💬", "⚠️", "⚖️", "💰", "✅"];
-
 export default function ResultPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -28,7 +26,7 @@ export default function ResultPage() {
   }, []);
 
   const classification = result?.recommendation?.feasibility_score?.classification;
-  const classIcon = classification === "LAYAK" ? "🚀" : classification === "CUKUP LAYAK" ? "⚡" : "🛑";
+  const classDot = classification === "LAYAK" ? "bg-emerald-400" : classification === "CUKUP LAYAK" ? "bg-amber-400" : "bg-rose-400";
 
   return (
     <div className="min-h-screen bg-gray-950 py-8 px-4">
@@ -38,11 +36,14 @@ export default function ResultPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <a href="/" className="text-blue-400 text-sm hover:text-blue-300 transition-colors">
-              ← Beranda
+              Beranda
             </a>
-            <h1 className="text-2xl font-black mt-1">
+            <h1 className="text-2xl font-black mt-1 flex items-center gap-2.5">
               {result ? (
-                <>{classIcon} {result.params?.topicSubField} — {result.params?.industryCategory}</>
+                <>
+                  <span className={`inline-block w-2.5 h-2.5 rounded-full ${classDot}`} />
+                  <span>{result.params?.topicSubField} — {result.params?.industryCategory}</span>
+                </>
               ) : "Analisis Berjalan..."}
             </h1>
             {result && (
@@ -61,14 +62,14 @@ export default function ResultPage() {
 
         <div className="grid lg:grid-cols-[300px_1fr] gap-6">
 
-          {/* ── Left: Live Monitor (sticky) ─────────────────────────────── */}
+          {/* Left: Live Monitor (sticky) */}
           <div className="space-y-4">
             <LiveMonitor sessionId={sessionId} onComplete={handleComplete} />
 
             {/* Monitoring Stats */}
             {result?.monitoring && (
               <div className="glass-card rounded-2xl p-4">
-                <p className="text-xs font-bold text-gray-400 mb-3">📊 Monitoring Stats</p>
+                <p className="text-xs font-bold text-gray-400 mb-3">Monitoring Stats</p>
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-500">Total waktu</span>
@@ -95,7 +96,7 @@ export default function ResultPage() {
             {/* Meta info */}
             {result?.meta && (
               <div className="glass-card rounded-2xl p-4">
-                <p className="text-xs font-bold text-gray-400 mb-2">🔬 Metodologi</p>
+                <p className="text-xs font-bold text-gray-400 mb-2">Metodologi</p>
                 <div className="space-y-1 text-xs text-gray-500">
                   <p>• {result.meta.agent_count} agen berbeda</p>
                   <p>• {result.meta.assessment_dimensions} sifat penilaian</p>
@@ -108,43 +109,46 @@ export default function ResultPage() {
             )}
           </div>
 
-          {/* ── Right: Results ───────────────────────────────────────────── */}
+          {/* Right: Results */}
           <div className="space-y-6">
 
             {/* Loading state */}
             {!result && (
-              <div className="glass-card rounded-2xl p-12 text-center">
-                <div className="text-5xl mb-4">🤖</div>
-                <h2 className="text-xl font-bold text-gray-300">9 Agen AI sedang bekerja...</h2>
-                <p className="text-gray-500 mt-2 text-sm">
+              <div className="glass-card rounded-2xl p-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <Loader2 size={20} className="text-blue-400 animate-spin" />
+                  <h2 className="text-lg font-bold text-gray-200">9 Agen AI sedang menganalisis</h2>
+                </div>
+                <p className="text-gray-500 text-sm mb-8">
                   7 sifat penilaian · 7 metode scraping · data real-time Indonesia
                 </p>
-                <div className="mt-6 flex justify-center gap-2 flex-wrap">
-                  {AGENT_EMOJIS.map((e, i) => (
-                    <span
-                      key={i}
-                      className="text-2xl opacity-30"
-                      style={{ animation: `agent-pulse 1.5s ease-in-out ${i * 0.17}s infinite` }}
-                    >{e}</span>
-                  ))}
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-28 rounded-xl bg-gray-800/60" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="h-20 rounded-xl bg-gray-800/40" />
+                    <div className="h-20 rounded-xl bg-gray-800/40" />
+                  </div>
+                  <div className="h-4 w-3/4 rounded bg-gray-800/50" />
+                  <div className="h-4 w-2/3 rounded bg-gray-800/50" />
+                  <div className="h-4 w-1/2 rounded bg-gray-800/50" />
                 </div>
               </div>
             )}
 
             {result && (
               <>
-                {/* ── Agent 9: Feasibility Score (TOP) ───────────────────── */}
+                {/* Agent 9: Feasibility Score (TOP) */}
                 {result.recommendation?.feasibility_score && (
                   <PanelBoundary name="Skor Kelayakan">
                     <FeasibilityScore data={result.recommendation.feasibility_score} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Early warnings from Orchestrator ───────────────────── */}
+                {/* Early warnings from Orchestrator */}
                 {toTextList(result.orchestrator?.early_warnings).length > 0 && (
                   <div className="glass-card rounded-2xl p-5">
                     <h3 className="text-sm font-bold text-yellow-400 mb-3">
-                      ⚠️ Peringatan Awal (dari Orchestrator)
+                      Peringatan Awal (dari Orchestrator)
                     </h3>
                     {toTextList(result.orchestrator?.early_warnings).map((w, i) => (
                       <div key={i} className="flex gap-2 text-sm text-gray-300 mb-1.5">
@@ -154,63 +158,63 @@ export default function ResultPage() {
                   </div>
                 )}
 
-                {/* ── Agent 9: Strategic Recommendation ──────────────────── */}
+                {/* Agent 9: Strategic Recommendation */}
                 {result.recommendation && (
                   <PanelBoundary name="Rekomendasi Strategis">
                     <RecommendationPanel rec={result.recommendation} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 2: BMC ────────────────────────────────────────── */}
+                {/* Agent 2: BMC */}
                 {result.bmc && (
                   <PanelBoundary name="Business Model Canvas">
                     <BMCDisplay bmc={result.bmc} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 3: Market Research ────────────────────────────── */}
+                {/* Agent 3: Market Research */}
                 {result.market && (
                   <PanelBoundary name="Market Research">
                     <MarketChart market={result.market} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 4: Competitor Analysis ────────────────────────── */}
+                {/* Agent 4: Competitor Analysis */}
                 {result.competitor && (
                   <PanelBoundary name="Analisis Kompetitor">
                     <CompetitorTable competitor={result.competitor} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 5: Sentiment & Social Intelligence (NEW) ─────── */}
+                {/* Agent 5: Sentiment & Social Intelligence (NEW) */}
                 {result.sentiment && (
                   <PanelBoundary name="Sentiment & Social Intelligence">
                     <SentimentPanel sentiment={result.sentiment} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 6: Risk Analysis ──────────────────────────────── */}
+                {/* Agent 6: Risk Analysis */}
                 {result.risk && (
                   <PanelBoundary name="Analisis Risiko">
                     <RiskMatrix risk={result.risk} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 7: Regulatory Intelligence (NEW) ─────────────── */}
+                {/* Agent 7: Regulatory Intelligence (NEW) */}
                 {result.regulatory && (
                   <PanelBoundary name="Regulatory Intelligence">
                     <RegulatoryPanel regulatory={result.regulatory} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Agent 8: Financial Modeling (NEW) ──────────────────── */}
+                {/* Agent 8: Financial Modeling (NEW) */}
                 {result.financial && (
                   <PanelBoundary name="Financial Modeling">
                     <FinancialPanel financial={result.financial} />
                   </PanelBoundary>
                 )}
 
-                {/* ── Footer ──────────────────────────────────────────────── */}
+                {/* Footer */}
                 <div className="text-center py-8">
                   <p className="text-gray-500 text-sm mb-1">
                     Dianalisis oleh <strong className="text-gray-400">FeasiFlow AI</strong> — 9 Agentic AI
@@ -222,7 +226,7 @@ export default function ResultPage() {
                     href="/analyze"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 rounded-xl font-semibold transition-opacity"
                   >
-                    🚀 Analisis Ide Baru
+                    Analisis Ide Baru
                   </a>
                 </div>
               </>

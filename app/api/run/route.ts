@@ -14,9 +14,8 @@ import { runRecommendation } from "@/lib/agents-ts/recommendation";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 minutes (Vercel Pro/Hobby streaming)
 
-// ── Admission control (antrian) ──────────────────────────────────────────────
-// Cap concurrent pipelines so each running analysis keeps enough Groq token
-// budget to finish within the 300s limit. Over capacity → 503 and the client
+// Admission control (antrian) // Cap concurrent pipelines so each running analysis keeps enough Groq token
+// budget to finish within the 300s limit. Over capacity 503 and the client
 // waits in a queue + retries, which also staggers spikes into spread-out load.
 const MAX_CONCURRENT = Number(process.env.MAX_CONCURRENT_RUNS ?? 5);
 let activeRuns = 0;
@@ -64,7 +63,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Parameter tidak lengkap" }, { status: 400 });
   }
 
-  // At capacity → tell the client to wait in the antrian and retry shortly.
+  // At capacity tell the client to wait in the antrian and retry shortly.
   if (activeRuns >= MAX_CONCURRENT) {
     return NextResponse.json(
       { queued: true, active: activeRuns, capacity: MAX_CONCURRENT, message: "Sistem sibuk — Anda dalam antrian." },
@@ -118,7 +117,7 @@ export async function POST(request: Request) {
   // Run pipeline asynchronously so we can return the stream header immediately
   (async () => {
     try {
-      // ── Phase 1: Orchestrator ─────────────────────────────────────────────
+      // Phase 1: Orchestrator
       agentStart("orchestrator", 5);
       const t0 = Date.now();
       const orchestratorResult = await runOrchestrator(agentParams);
@@ -133,14 +132,14 @@ export async function POST(request: Request) {
       };
       agentDone("orchestrator", 15, (Date.now() - t0) / 1000, 0);
 
-      // ── Phase 2: BMC ──────────────────────────────────────────────────────
+      // Phase 2: BMC
       agentStart("bmc", 15);
       const t1 = Date.now();
       const bmcResult = await runBMC(agentParams, orchestratorResult.mission);
       results.bmc = bmcResult as unknown as AnalysisResult["bmc"];
       agentDone("bmc", 28, (Date.now() - t1) / 1000, 0);
 
-      // ── Phase 3: Market + Competitor + Sentiment (parallel) ───────────────
+      // Phase 3: Market + Competitor + Sentiment (parallel)
       agentStart("market_research", 28);
       agentStart("competitor", 28);
       agentStart("sentiment", 28);
@@ -161,7 +160,7 @@ export async function POST(request: Request) {
       agentDone("competitor", 50, p3elapsed, 0);
       agentDone("sentiment", 50, p3elapsed, 0);
 
-      // ── Phase 4: Risk + Regulatory (parallel) ─────────────────────────────
+      // Phase 4: Risk + Regulatory (parallel)
       agentStart("risk", 50);
       agentStart("regulatory", 50);
 
@@ -178,14 +177,14 @@ export async function POST(request: Request) {
       agentDone("risk", 70, p4elapsed, 0);
       agentDone("regulatory", 70, p4elapsed, 0);
 
-      // ── Phase 5: Financial ────────────────────────────────────────────────
+      // Phase 5: Financial
       agentStart("financial", 70);
       const t4 = Date.now();
       const financialResult = await runFinancial(agentParams, bmcResult, riskResult);
       results.financial = financialResult as unknown as AnalysisResult["financial"];
       agentDone("financial", 85, (Date.now() - t4) / 1000, 0);
 
-      // ── Phase 6: Recommendation ───────────────────────────────────────────
+      // Phase 6: Recommendation
       agentStart("recommendation", 85);
       const t5 = Date.now();
       const recResult = await runRecommendation(
@@ -197,14 +196,34 @@ export async function POST(request: Request) {
 
       // Build FeasibilityScore from score_breakdown
       const sb = recResult.score_breakdown as Record<string, number>;
+      const totalScoreNum = (recResult.total_score as number) || 0;
+      const baseScoreNum = (recResult.base_score as number) ?? totalScoreNum;
+      const inputQualityNum = (recResult.input_quality_score as number) ?? 100;
+      const inputQualityWhy = (recResult.input_quality_reasoning as string) || "";
+
+      // Derive weakest/strongest dimension from the 7 dimension scores (reasoning).
+      const dimEntries: [string, number][] = [
+        ["Validasi Pasar", sb?.market_score ?? 0],
+        ["Kekuatan Model Bisnis", sb?.business_model_score ?? 0],
+        ["Profil Risiko", sb?.risk_score ?? 0],
+        ["Posisi Kompetitif", sb?.competitive_advantage_score ?? 0],
+        ["Keberlanjutan Finansial", sb?.financial_sustainability_score ?? 0],
+        ["Validasi Demand Publik", sb?.demand_validation_score ?? 0],
+        ["Kelayakan Regulasi", sb?.regulatory_feasibility_score ?? 0],
+      ];
+      const sortedDims = [...dimEntries].sort((a, b) => a[1] - b[1]);
+      const weakestDim = sortedDims[0];
+      const strongestDim = sortedDims[sortedDims.length - 1];
+      const qualityPenalty = +(baseScoreNum - totalScoreNum).toFixed(1);
+
       const feasibilityScore: AnalysisResult["recommendation"]["feasibility_score"] = {
-        total_score: (recResult.total_score as number) || 0,
-        classification: (recResult.total_score as number) >= 75
+        total_score: totalScoreNum,
+        classification: totalScoreNum >= 75
           ? "LAYAK"
-          : (recResult.total_score as number) >= 55
+          : totalScoreNum >= 55
           ? "CUKUP LAYAK"
           : "TIDAK LAYAK",
-        classification_icon: (recResult.total_score as number) >= 75 ? "🚀" : (recResult.total_score as number) >= 55 ? "⚡" : "🛑",
+        classification_icon: totalScoreNum >= 75 ? "" : totalScoreNum >= 55 ? "" : "",
         breakdown: {
           market_score: sb?.market_score ?? 0,
           market_weight: 0.20,
@@ -229,10 +248,15 @@ export async function POST(request: Request) {
           regulatory_feasibility_contribution: sb?.regulatory_feasibility_contribution ?? 0,
         },
         confidence_level: ((recResult.confidence_level as string) ?? "sedang") as "rendah" | "sedang" | "tinggi",
-        confidence_reasoning: "",
-        weakest_dimension: "",
-        strongest_dimension: "",
-        scenario_impact: { base_score: recResult.total_score as number, with_scenarios: recResult.total_score as number, delta: 0, active_scenarios: [] },
+        confidence_reasoning: inputQualityWhy,
+        weakest_dimension: `${weakestDim[0]} (${Math.round(weakestDim[1])}/100) — area paling rapuh, butuh perbaikan prioritas.`,
+        strongest_dimension: `${strongestDim[0]} (${Math.round(strongestDim[1])}/100) — dimensi terkuat saat ini.`,
+        scenario_impact: {
+          base_score: baseScoreNum,
+          with_scenarios: totalScoreNum,
+          delta: -qualityPenalty,
+          active_scenarios: qualityPenalty > 0 ? [`Penalti kualitas input (${inputQualityNum}/100)`] : [],
+        },
       };
 
       results.recommendation = {
@@ -251,7 +275,7 @@ export async function POST(request: Request) {
 
       agentDone("recommendation", 100, (Date.now() - t5) / 1000, 0);
 
-      // ── Final: emit complete ──────────────────────────────────────────────
+      // Final: emit complete
       monitoring.total_elapsed_seconds = +((Date.now() - startTime) / 1000).toFixed(1);
       results.monitoring = monitoring;
       results.meta = {

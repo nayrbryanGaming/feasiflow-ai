@@ -1,8 +1,9 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import type { StartupParams } from "./orchestrator";
 
-const SYSTEM_PROMPT = `Anda adalah Chief Investment & Recommendation Agent AI untuk startup Indonesia.
-Anda menerima hasil dari 8 agen sebelumnya dan membuat keputusan investasi final.
+const SYSTEM_PROMPT = `Anda adalah Chief Investment & Recommendation Agent AI untuk startup Indonesia — seorang investor due-diligence yang SANGAT KRITIS.
+Anda menerima hasil dari 8 agen sebelumnya dan membuat keputusan investasi final yang JUJUR dan tegas.
+WAJIB: berikan reasoning konkret untuk setiap penilaian. Jangan ada skor tanpa justifikasi. Jika input/ide lemah, katakan terus terang dan beri rekomendasi NO-GO.
 
 Formula skor final (TOTAL 100%):
 - Validasi Pasar (market_score) × 0.20 = 20%
@@ -21,7 +22,7 @@ confidence_level (high/medium/low), executive_summary, strengths (array string),
 challenges (array string), strategic_recommendations (array string),
 next_steps (array string), key_success_factors (array string), red_flags_summary,
 score_breakdown (object dengan semua 7 dimensi skor dan kontribusi),
-investment_verdict, estimated_success_probability_pct.`;
+investment_verdict, estimated_success_probability_pct, score_justification (penjelasan kenapa skor segini).` + CRITICAL_SCORING_GUIDE;
 
 export async function runRecommendation(
   params: StartupParams,
@@ -102,15 +103,37 @@ Total Score (sudah dihitung): ${totalScore}/100
 Berikan analisis mendalam dan rekomendasi strategis.
 PENTING: total_score HARUS = ${totalScore} (sudah dihitung, jangan ubah).`;
 
+  // Input-quality gate from the Orchestrator: vague/random input can NOT score high.
+  const inputQuality = Math.max(0, Math.min(100,
+    Number(orchestratorResult.input_quality_score) || 50));
+  const inputQualityReasoning = String(orchestratorResult.input_quality_reasoning || "");
+
+  const enrichedUserMsg = `${userMsg}
+
+=== KUALITAS INPUT (dari Orchestrator) ===
+Skor kualitas input: ${inputQuality}/100. ${inputQualityReasoning}
+Jika kualitas input rendah, JANGAN beri skor tinggi — jelaskan keterbatasannya dan rekomendasikan perbaikan/NO-GO.`;
+
   const { content } = await callGroq([
     { role: "system", content: SYSTEM_PROMPT },
-    { role: "user", content: userMsg },
-  ], { temperature: 0.6, maxTokens: 4096 });
+    { role: "user", content: enrichedUserMsg },
+  ], { temperature: 0.55, maxTokens: 4096 });
 
   const result = parseJson(content);
-  // Override calculated score to ensure consistency
-  result.total_score = totalScore;
+
+  // Transparent penalty: scale the weighted score by input quality, hard-cap
+  // for garbage input. This is what stops random input from scoring ~68.
+  const qualityMult = 0.4 + 0.6 * (inputQuality / 100);   // 0.40 .. 1.00
+  let adjusted = Math.round(totalScore * qualityMult);
+  if (inputQuality < 25) adjusted = Math.min(adjusted, 30);
+  adjusted = Math.max(1, Math.min(100, adjusted));
+
+  result.base_score = totalScore;
+  result.total_score = adjusted;
   result.score_breakdown = scoreBreakdown;
+  result.input_quality_score = inputQuality;
+  result.input_quality_reasoning = inputQualityReasoning;
+  result.input_quality_penalty = totalScore - adjusted;
 
   return result;
 }

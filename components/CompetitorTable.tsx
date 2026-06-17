@@ -12,7 +12,7 @@ export function CompetitorTable({ competitor }: { competitor: AnalysisResult["co
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold">🔍 Analisis Kompetitor</h2>
+        <h2 className="text-xl font-bold">Analisis Kompetitor</h2>
         <div className="text-right">
           <span className="text-2xl font-black text-cyan-400">
             {toNum(competitor?.competitive_advantage_score)}<span className="text-sm text-gray-500">/100</span>
@@ -34,7 +34,7 @@ export function CompetitorTable({ competitor }: { competitor: AnalysisResult["co
 
       {/* Our edge */}
       <div className="mb-5 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
-        <p className="text-xs font-bold text-green-400 mb-1">🏆 Diferensiasi Kita</p>
+        <p className="text-xs font-bold text-green-400 mb-1">Diferensiasi Kita</p>
         <p className="text-sm text-gray-300">{toText(competitor?.our_differentiation)}</p>
         {competitor?.competitive_moat && (
           <p className="text-xs text-gray-500 mt-2">Moat: {toText(competitor.competitive_moat)}</p>
@@ -44,7 +44,7 @@ export function CompetitorTable({ competitor }: { competitor: AnalysisResult["co
       {/* Recommended Positioning */}
       {competitor?.recommended_positioning && (
         <div className="mb-5 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
-          <p className="text-xs font-bold text-blue-400 mb-1">🎯 Positioning Rekomendasi</p>
+          <p className="text-xs font-bold text-blue-400 mb-1">Positioning Rekomendasi</p>
           <p className="text-sm text-gray-300">{toText(competitor.recommended_positioning)}</p>
         </div>
       )}

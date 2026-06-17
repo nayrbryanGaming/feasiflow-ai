@@ -4,10 +4,10 @@ import type { AnalysisResult } from "@/lib/types";
 import { getRiskColor, toText, toTextList } from "@/lib/utils";
 
 const RISK_DIM_LABELS: Record<string, string> = {
-  financial_risk: "💵 Risiko Finansial",
-  market_risk: "📊 Risiko Pasar",
-  operational_risk: "⚙️ Risiko Operasional",
-  regulatory_risk: "⚖️ Risiko Regulasi",
+  financial_risk: "Risiko Finansial",
+  market_risk: "Risiko Pasar",
+  operational_risk: "Risiko Operasional",
+  regulatory_risk: "Risiko Regulasi",
 };
 
 // LLM scores sometimes arrive as strings/objects — coerce to a finite number.
@@ -23,7 +23,7 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold">⚠️ Analisis Risiko</h2>
+        <h2 className="text-xl font-bold">Analisis Risiko</h2>
         <div className="text-right">
           <div className="text-2xl font-black text-white">
             {num(risk?.overall_risk_score)}<span className="text-sm text-gray-500">/100</span>
@@ -35,7 +35,7 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
       {/* Runway estimate */}
       {risk?.runway_estimate && (
         <div className="mb-5 p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl">
-          <p className="text-xs text-blue-400 font-bold">⏱ Estimasi Runway</p>
+          <p className="text-xs text-blue-400 font-bold">Estimasi Runway</p>
           <p className="text-sm text-white font-semibold mt-1">{toText(risk.runway_estimate)}</p>
         </div>
       )}
@@ -97,7 +97,7 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
                           {toText(rr.risk ?? r)}
                         </div>
                         {toText(rr.mitigation) && (
-                          <div className="text-gray-500 mt-1">↳ {toText(rr.mitigation)}</div>
+                          <div className="text-gray-500 mt-1">{toText(rr.mitigation)}</div>
                         )}
                       </div>
                     );
@@ -136,7 +136,7 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
       {/* Summary — support both field names */}
       {(risk?.risk_summary ?? (risk as any)?.risk_mitigation_summary) && (
         <div className="mt-4 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
-          <p className="text-xs text-green-400 font-bold mb-1">✅ Ringkasan Risiko & Mitigasi</p>
+          <p className="text-xs text-green-400 font-bold mb-1">Ringkasan Risiko & Mitigasi</p>
           <p className="text-xs text-gray-300">
             {toText(risk?.risk_summary ?? (risk as any)?.risk_mitigation_summary)}
           </p>

@@ -32,3 +32,4 @@ dist/
 
 .vercel
 tsconfig.tsbuildinfo
+scripts/

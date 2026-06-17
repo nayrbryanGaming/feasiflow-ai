@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import { search, formatResults } from "./search";
 import type { StartupParams } from "./orchestrator";
 
@@ -9,7 +9,7 @@ Sifat penilaian: ukuran TAM/SAM/SOM, tren pertumbuhan YoY, penetrasi digital, da
 Output JSON dengan keys: total_addressable_market, serviceable_addressable_market,
 serviceable_obtainable_market, market_growth_rate, market_trends (array), digital_penetration,
 consumer_behavior_insights, market_timing_assessment, market_score, market_size_idr,
-growth_drivers (array), market_risks (array), data_sources (array).`;
+growth_drivers (array), market_risks (array), data_sources (array).` + CRITICAL_SCORING_GUIDE;
 
 export async function runMarketResearch(
   params: StartupParams,

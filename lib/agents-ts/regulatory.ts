@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import type { StartupParams } from "./orchestrator";
 
 // Database regulasi per kategori
@@ -47,7 +47,7 @@ Berikan regulatory_feasibility_score (0-100) sebagai bobot 8% dari skor final.
 Output JSON dengan keys: regulatory_feasibility_score, regulatory_status,
 dimension_scores (object dengan 7 keys), required_licenses (array), compliance_timeline_months,
 compliance_cost_estimate_idr, key_regulators (array), regulatory_risks (array),
-regulatory_opportunities (array), regulatory_summary.`;
+regulatory_opportunities (array), regulatory_summary.` + CRITICAL_SCORING_GUIDE;
 
 export async function runRegulatory(
   params: StartupParams,

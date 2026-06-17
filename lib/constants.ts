@@ -1,6 +1,6 @@
 import type { IndustryCategory } from "./types";
 
-// ── 7 Startup Categories (mapped to scraping matrix & regulatory DB) ─────────
+// 7 Startup Categories (mapped to scraping matrix & regulatory DB)
 export const INDUSTRY_CATEGORIES: IndustryCategory[] = [
   "Fintech",
   "Edutech",
@@ -59,17 +59,17 @@ export const DYNAMIC_SCENARIOS = [
   "Pivot Model Bisnis",
 ] as const;
 
-// ── 9 Agent Labels & Order ────────────────────────────────────────────────────
+// 9 Agent Labels & Order
 export const AGENT_LABELS: Record<string, string> = {
-  orchestrator: "🧠 Orchestrator",
-  bmc: "📊 Business Model Canvas",
-  market_research: "📈 Market Research",
-  competitor: "🔍 Competitor Analysis",
-  sentiment: "💬 Sentiment & Social Intelligence",
-  risk: "⚠️ Risk Analysis",
-  regulatory: "⚖️ Regulatory Intelligence",
-  financial: "💰 Financial Modeling",
-  recommendation: "✅ Scoring & Recommendation",
+  orchestrator: "Orchestrator",
+  bmc: "Business Model Canvas",
+  market_research: "Market Research",
+  competitor: "Competitor Analysis",
+  sentiment: "Sentiment & Social Intelligence",
+  risk: "Risk Analysis",
+  regulatory: "Regulatory Intelligence",
+  financial: "Financial Modeling",
+  recommendation: "Scoring & Recommendation",
 };
 
 export const AGENT_ORDER = [
@@ -84,7 +84,7 @@ export const AGENT_ORDER = [
   "recommendation",
 ];
 
-// ── 7 Sifat Penilaian (Assessment Dimensions) ────────────────────────────────
+// 7 Sifat Penilaian (Assessment Dimensions)
 export const ASSESSMENT_DIMENSIONS = [
   { key: "market", label: "Validasi Pasar", weight: 0.20, agent: "market_research", color: "blue" },
   { key: "business_model", label: "Kekuatan Model Bisnis", weight: 0.18, agent: "bmc", color: "purple" },
@@ -95,9 +95,9 @@ export const ASSESSMENT_DIMENSIONS = [
   { key: "regulatory_feasibility", label: "Kelayakan Regulasi", weight: 0.08, agent: "regulatory", color: "yellow" },
 ];
 
-// ── Scoring Interpretation ────────────────────────────────────────────────────
+// Scoring Interpretation
 export const SCORE_BANDS = [
-  { min: 75, max: 100, label: "LAYAK", icon: "🚀", color: "green", description: "Indikator kuat untuk melanjutkan ke eksekusi" },
-  { min: 55, max: 74, label: "CUKUP LAYAK", icon: "⚡", color: "yellow", description: "Potensial ada, perbaiki area kritis terlebih dahulu" },
-  { min: 0, max: 54, label: "TIDAK LAYAK", icon: "🛑", color: "red", description: "Tantangan fundamental harus diselesaikan sebelum lanjut" },
+  { min: 75, max: 100, label: "LAYAK", icon: "", color: "green", description: "Indikator kuat untuk melanjutkan ke eksekusi" },
+  { min: 55, max: 74, label: "CUKUP LAYAK", icon: "", color: "yellow", description: "Potensial ada, perbaiki area kritis terlebih dahulu" },
+  { min: 0, max: 54, label: "TIDAK LAYAK", icon: "", color: "red", description: "Tantangan fundamental harus diselesaikan sebelum lanjut" },
 ];

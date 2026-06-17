@@ -128,6 +128,21 @@ export async function callGroq(
   throw lastErr ?? new Error("Groq: exhausted retries");
 }
 
+// Shared rubric appended to every scoring agent so the panel of agents grades
+// like a skeptical investor/examiner instead of defaulting to a generous 60-70.
+// Direction-neutral so it works for both positive dimensions and the risk agent.
+export const CRITICAL_SCORING_GUIDE = `
+
+PRINSIP PENILAIAN KRITIS (WAJIB DIPATUHI):
+Anda evaluator SKEPTIS, KRITIS, dan KETAT seperti investor due-diligence / penguji sidang — BUKAN motivator. Default Anda adalah ragu, bukan percaya.
+- Sebar skor realistis di SELURUH rentang 0-100. DILARANG menggumpalkan skor di 55-75.
+- Skala: 0-20 fatal/asal · 21-40 lemah & banyak celah · 41-60 rata-rata, risiko besar belum terjawab · 61-80 kuat & berbukti · 81-100 luar biasa (LANGKA, butuh bukti keras).
+- Untuk dimensi POSITIF (pasar, model bisnis, kompetitif, finansial, demand, regulasi): jika deskripsi ide VAGUE, generik, terlalu pendek, tidak koheren, atau tanpa diferensiasi → skor WAJIB RENDAH (<40).
+- Untuk RISIKO: ide lemah/vague/belum teruji → skor risiko WAJIB TINGGI (>65).
+- DILARANG memberi skor bagus tanpa BUKTI konkret. Selalu sebutkan kelemahan/celah spesifik yang Anda temukan.
+- Setiap skor WAJIB disertai alasan singkat berbasis bukti, bukan pujian umum.
+Lebih baik terlalu kritis daripada optimis palsu.`;
+
 export function stripThink(content: string): string {
   if (content.includes("</think>")) {
     return content.slice(content.lastIndexOf("</think>") + 8).trim();

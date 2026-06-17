@@ -38,9 +38,9 @@ export default function AnalyzePage() {
 
   const {
     register,
-    handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -67,11 +67,36 @@ export default function AnalyzePage() {
     setValue(field, next);
   };
 
-  const onSubmit = async (data: FormData) => {
+  // Force-submit: NEVER blocked by validation. Any field left empty is filled
+  // with a sensible default so the button always fires ("wajib nyala").
+  const buildParams = (): StartupParameters => {
+    const v = getValues();
+    const industry = v.industryCategory || INDUSTRY_CATEGORIES[0];
+    const subs = SUBTOPICS[industry] || [];
+    const desc = (v.ideaDescription || "").trim();
+    return {
+      industryCategory: industry,
+      topicSubField: v.topicSubField || subs[0] || "Umum",
+      operatingModel: v.operatingModel || "Daring",
+      location: v.location || "",
+      platform: v.platform || "",
+      initialCapital: v.initialCapital || CAPITAL_OPTIONS[1],
+      readinessLevel: v.readinessLevel || READINESS_LEVELS[0],
+      teamExpertise: v.teamExpertise?.length ? v.teamExpertise : [TEAM_EXPERTISE[0]],
+      riskProfile: v.riskProfile || RISK_PROFILES[1],
+      dynamicScenarios: v.dynamicScenarios || [],
+      ideaDescription: desc.length >= 20
+        ? desc
+        : `${desc || "Ide startup"} — deskripsi belum lengkap; analisis dijalankan dengan informasi terbatas.`,
+    } as StartupParameters;
+  };
+
+  const forceSubmit = async () => {
+    if (isSubmitting) return;
     setIsSubmitting(true);
     setError("");
     try {
-      const { sessionId } = await startAnalysis(data as StartupParameters);
+      const { sessionId } = await startAnalysis(buildParams());
       router.push(`/analyze/${sessionId}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Terjadi kesalahan. Coba lagi.");
@@ -88,7 +113,7 @@ export default function AnalyzePage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
-          <a href="/" className="text-blue-400 text-sm hover:text-blue-300 mb-4 inline-block">← Kembali ke Beranda</a>
+          <a href="/" className="text-blue-400 text-sm hover:text-blue-300 mb-4 inline-block">Kembali ke Beranda</a>
           <h1 className="text-3xl font-black">Analisis Kelayakan Startup</h1>
           <p className="text-gray-400 mt-2">Isi parameter untuk memulai analisis 9-agen · 7 sifat penilaian · 7 metode scraping</p>
         </div>
@@ -103,9 +128,9 @@ export default function AnalyzePage() {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); forceSubmit(); }} className="space-y-6">
 
-          {/* ── Step 1: Industry ── */}
+          {/* Step 1: Industry */}
           {step === 1 && (
             <div className="glass-card rounded-2xl p-6 space-y-5">
               <h2 className="text-lg font-bold text-blue-400">Step 1: Informasi Industri</h2>
@@ -169,7 +194,7 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          {/* ── Step 2: Team & Capital ── */}
+          {/* Step 2: Team & Capital */}
           {step === 2 && (
             <div className="glass-card rounded-2xl p-6 space-y-5">
               <h2 className="text-lg font-bold text-blue-400">Step 2: Tim & Modal</h2>
@@ -261,7 +286,7 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          {/* ── Step 3: Description & Submit ── */}
+          {/* Step 3: Description & Submit */}
           {step === 3 && (
             <div className="glass-card rounded-2xl p-6 space-y-5">
               <h2 className="text-lg font-bold text-blue-400">Step 3: Deskripsi Ide</h2>

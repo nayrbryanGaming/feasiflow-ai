@@ -1,4 +1,4 @@
-import { callGroq, parseJson } from "./config";
+import { callGroq, parseJson, CRITICAL_SCORING_GUIDE } from "./config";
 import type { StartupParams } from "./orchestrator";
 
 const SYSTEM_PROMPT = `Anda adalah Business Model Canvas Specialist AI untuk startup Indonesia.
@@ -8,7 +8,7 @@ Pertimbangkan konteks Indonesia: perilaku konsumen lokal, infrastruktur digital,
 Output JSON dengan keys: value_propositions, customer_segments, channels, customer_relationships,
 revenue_streams, key_resources, key_activities, key_partnerships, cost_structure,
 business_model_score, model_coherence_analysis, revenue_model_clarity, scalability_assessment,
-unit_economics_preview, critical_assumptions.`;
+unit_economics_preview, critical_assumptions.` + CRITICAL_SCORING_GUIDE;
 
 export async function runBMC(params: StartupParams, orchestratorMission: string): Promise<Record<string, unknown>> {
   const userMsg = `Analisis BMC untuk ${params.startup_name} (${params.industry_category}):

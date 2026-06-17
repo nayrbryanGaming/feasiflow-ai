@@ -13,7 +13,7 @@ export default function AnalyzeError({
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
       <div className="glass-card rounded-2xl p-8 max-w-md text-center">
-        <div className="text-5xl mb-4">🛠️</div>
+        <div className="text-5xl mb-4"></div>
         <h1 className="text-xl font-bold text-gray-100 mb-2">Terjadi gangguan menampilkan hasil</h1>
         <p className="text-sm text-gray-400 mb-6">
           Analisis mungkin sudah selesai, tetapi ada kendala saat menampilkannya.

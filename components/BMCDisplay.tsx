@@ -9,7 +9,7 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
 
   const blocks = [
     {
-      title: "💡 Value Propositions",
+      title: "Value Propositions",
       color: "border-blue-500/40 bg-blue-500/5",
       content: (
         <div className="space-y-2 text-sm text-gray-300">
@@ -29,7 +29,7 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
       ),
     },
     {
-      title: "👥 Customer Segments",
+      title: "Customer Segments",
       color: "border-purple-500/40 bg-purple-500/5",
       content: (
         <div className="space-y-2 text-sm text-gray-300">
@@ -43,7 +43,7 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
       ),
     },
     {
-      title: "💰 Revenue Streams",
+      title: "Revenue Streams",
       color: "border-green-500/40 bg-green-500/5",
       content: (
         <div className="space-y-2 text-sm text-gray-300">
@@ -64,7 +64,7 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
       ),
     },
     {
-      title: "📣 Channels",
+      title: "Channels",
       color: "border-amber-500/40 bg-amber-500/5",
       content: (
         <div className="space-y-2 text-sm text-gray-300">
@@ -77,15 +77,15 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
       ),
     },
     {
-      title: "🔑 Key Resources",
+      title: "Key Resources",
       color: "border-rose-500/40 bg-rose-500/5",
       content: (
         <div className="space-y-2 text-sm text-gray-300">
           {toTextList(b.key_resources?.human_resources).map((r, i) => (
-            <div key={i} className="flex gap-2"><span className="text-blue-400">👤</span><span className="text-xs">{r}</span></div>
+            <div key={i} className="flex gap-2"><span className="text-blue-400"></span><span className="text-xs">{r}</span></div>
           ))}
           {toTextList(b.key_resources?.intellectual_resources).map((r, i) => (
-            <div key={i} className="flex gap-2"><span className="text-purple-400">💾</span><span className="text-xs">{r}</span></div>
+            <div key={i} className="flex gap-2"><span className="text-purple-400"></span><span className="text-xs">{r}</span></div>
           ))}
           <p className="text-rose-400 text-xs mt-2">Finansial: {toText(b.key_resources?.financial_requirements)}</p>
         </div>
@@ -96,7 +96,7 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold">📊 Business Model Canvas</h2>
+        <h2 className="text-xl font-bold">Business Model Canvas</h2>
         <span className="text-2xl font-black text-purple-400">
           {toNum(bmc.business_model_score)}<span className="text-sm text-gray-500">/100</span>
         </span>

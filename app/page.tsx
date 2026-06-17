@@ -71,7 +71,7 @@ export default function Home() {
               icon: <Zap size={28} className="text-purple-400" />,
               step: "02",
               title: "6 Agent Bekerja",
-              desc: "Orchestrator → BMC → Market Research → Kompetitor → Risiko → Rekomendasi.",
+              desc: "Orchestrator · BMC · Market Research · Kompetitor · Risiko · Rekomendasi.",
             },
             {
               icon: <BarChart3 size={28} className="text-green-400" />,
@@ -98,15 +98,17 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-10">6 Agen AI Otonom</h2>
           <div className="grid md:grid-cols-2 gap-4">
             {[
-              { emoji: "🧠", name: "Orchestrator Agent", desc: "Menganalisis parameter & menentukan prioritas analisis" },
-              { emoji: "📊", name: "BMC Agent", desc: "Menyusun 5 blok inti Business Model Canvas" },
-              { emoji: "📈", name: "Market Research Agent", desc: "Riset TAM/SAM/SOM & tren pasar real-time" },
-              { emoji: "🔍", name: "Competitor Analysis Agent", desc: "Identifikasi & analisis min. 3 kompetitor" },
-              { emoji: "⚠️", name: "Risk Analysis Agent", desc: "Analisis risiko 4 dimensi + dampak skenario" },
-              { emoji: "✅", name: "Recommendation Agent", desc: "Hitung skor 0-100 & rekomendasi strategis" },
-            ].map(({ emoji, name, desc }) => (
+              { name: "Orchestrator Agent", desc: "Menganalisis parameter & menentukan prioritas analisis" },
+              { name: "BMC Agent", desc: "Menyusun 5 blok inti Business Model Canvas" },
+              { name: "Market Research Agent", desc: "Riset TAM/SAM/SOM & tren pasar real-time" },
+              { name: "Competitor Analysis Agent", desc: "Identifikasi & analisis min. 3 kompetitor" },
+              { name: "Risk Analysis Agent", desc: "Analisis risiko 4 dimensi + dampak skenario" },
+              { name: "Recommendation Agent", desc: "Hitung skor 0-100 & rekomendasi strategis" },
+            ].map(({ name, desc }, i) => (
               <div key={name} className="flex gap-4 p-4 glass-card rounded-xl">
-                <span className="text-2xl">{emoji}</span>
+                <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold text-sm flex items-center justify-center">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
                 <div>
                   <p className="font-semibold text-sm">{name}</p>
                   <p className="text-gray-400 text-xs mt-0.5">{desc}</p>
