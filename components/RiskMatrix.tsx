@@ -1,7 +1,7 @@
 "use client";
 
 import type { AnalysisResult } from "@/lib/types";
-import { getRiskColor } from "@/lib/utils";
+import { getRiskColor, toText, toTextList } from "@/lib/utils";
 
 const RISK_DIM_LABELS: Record<string, string> = {
   financial_risk: "💵 Risiko Finansial",
@@ -12,6 +12,7 @@ const RISK_DIM_LABELS: Record<string, string> = {
 
 export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
   const riskLevelColor = getRiskColor(risk?.risk_level ?? "");
+  const criticalRisks = toTextList(risk?.top_3_critical_risks);
 
   return (
     <div className="glass-card rounded-2xl p-6">
@@ -34,11 +35,11 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
       )}
 
       {/* Top 3 Critical Risks */}
-      {(risk?.top_3_critical_risks?.length ?? 0) > 0 && (
+      {criticalRisks.length > 0 && (
         <div className="mb-5">
           <h3 className="text-sm font-bold text-red-400 mb-2">3 Risiko Kritis Teratas</h3>
           <div className="space-y-1">
-            {risk!.top_3_critical_risks.map((r, i) => (
+            {criticalRisks.map((r, i) => (
               <div key={i} className="flex gap-2 text-sm text-gray-300">
                 <span className="text-red-400 font-bold">{i + 1}.</span>{r}
               </div>
@@ -79,11 +80,11 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
                           r.probability === "High" ? "text-red-400" :
                           r.probability === "Medium" ? "text-yellow-400" : "text-green-400"
                         }`}>
-                          [{r.probability}]
+                          [{toText(r.probability)}]
                         </span>
-                        {r.risk}
+                        {toText(r.risk ?? r)}
                       </div>
-                      <div className="text-gray-500 mt-1">↳ {r.mitigation}</div>
+                      <div className="text-gray-500 mt-1">↳ {toText(r.mitigation)}</div>
                     </div>
                   ))}
                 </div>
@@ -119,7 +120,7 @@ export function RiskMatrix({ risk }: { risk: AnalysisResult["risk"] }) {
         <div className="mt-4 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
           <p className="text-xs text-green-400 font-bold mb-1">✅ Ringkasan Risiko & Mitigasi</p>
           <p className="text-xs text-gray-300">
-            {risk?.risk_summary ?? (risk as any)?.risk_mitigation_summary}
+            {toText(risk?.risk_summary ?? (risk as any)?.risk_mitigation_summary)}
           </p>
         </div>
       )}

@@ -1,19 +1,22 @@
 "use client";
 
 import type { AnalysisResult } from "@/lib/types";
+import { toText, toTextList } from "@/lib/utils";
 
 export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendation"] }) {
   if (!rec) return null;
 
-  // strategic_recommendations is now string[] in v3.0
-  const recs: string[] = Array.isArray(rec.strategic_recommendations)
-    ? (rec.strategic_recommendations as unknown as string[])
-    : [];
+  // These fields are typed string[] but the model pool sometimes returns
+  // arrays of objects — coerce everything to clean strings so the panel never
+  // crashes on "Objects are not valid as a React child" / r.toLowerCase().
+  const recs: string[] = toTextList(rec.strategic_recommendations);
 
   // Support both new fields (strengths/challenges) and legacy (key_strengths/critical_challenges)
-  const strengths: string[] = (rec as any).strengths ?? (rec as any).key_strengths ?? [];
-  const challenges: string[] = (rec as any).challenges ?? (rec as any).critical_challenges ?? [];
+  const strengths: string[] = toTextList((rec as any).strengths ?? (rec as any).key_strengths);
+  const challenges: string[] = toTextList((rec as any).challenges ?? (rec as any).critical_challenges);
 
+  const nextSteps: string[] = toTextList(rec.next_steps);
+  const successFactors: string[] = toTextList(rec.key_success_factors);
   const goNogo = rec.go_nogo_recommendation ?? "CONDITIONAL GO";
   const goColor =
     goNogo === "GO"
@@ -36,7 +39,7 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
       {rec.go_nogo_reasoning && (
         <div className="p-4 bg-gray-800/60 rounded-xl border border-gray-700/40">
           <p className="text-xs font-bold text-gray-400 mb-1">Alasan Keputusan</p>
-          <p className="text-sm text-gray-200">{rec.go_nogo_reasoning}</p>
+          <p className="text-sm text-gray-200">{toText(rec.go_nogo_reasoning)}</p>
         </div>
       )}
 
@@ -45,7 +48,7 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
         <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
           <p className="text-sm font-bold text-blue-400 mb-2">📋 Executive Summary</p>
           <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
-            {rec.executive_summary}
+            {toText(rec.executive_summary)}
           </div>
         </div>
       )}
@@ -108,11 +111,11 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
       )}
 
       {/* Next Steps */}
-      {(rec.next_steps?.length ?? 0) > 0 && (
+      {nextSteps.length > 0 && (
         <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-xl">
           <p className="text-sm font-bold text-purple-400 mb-3">🗺️ Langkah Berikutnya</p>
           <div className="space-y-2">
-            {rec.next_steps!.map((step, i) => (
+            {nextSteps.map((step, i) => (
               <div key={i} className="flex gap-2 text-sm text-gray-300">
                 <span className="text-purple-400 font-bold shrink-0">{i + 1}.</span>{step}
               </div>
@@ -122,10 +125,10 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
       )}
 
       {/* Key Success Factors */}
-      {rec.key_success_factors && rec.key_success_factors.length > 0 && (
+      {successFactors.length > 0 && (
         <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
           <p className="text-xs font-bold text-amber-400 mb-2">🔑 Faktor Kritis Keberhasilan</p>
-          {rec.key_success_factors.map((f, i) => (
+          {successFactors.map((f, i) => (
             <p key={i} className="text-xs text-gray-300 mb-1 flex gap-2">
               <span className="text-amber-400 shrink-0">★</span>{f}
             </p>
@@ -134,17 +137,17 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
       )}
 
       {/* Red Flags */}
-      {rec.red_flags_summary && rec.red_flags_summary !== "Tidak ada red flag kritis yang teridentifikasi." && (
+      {toText(rec.red_flags_summary) && toText(rec.red_flags_summary) !== "Tidak ada red flag kritis yang teridentifikasi." && (
         <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
           <p className="text-xs font-bold text-red-400 mb-2">🚨 Red Flag Tersisa</p>
-          <p className="text-xs text-gray-300">{rec.red_flags_summary}</p>
+          <p className="text-xs text-gray-300">{toText(rec.red_flags_summary)}</p>
         </div>
       )}
 
       {/* Comparable Successes */}
-      {rec.comparable_successes && (
+      {toText(rec.comparable_successes) && (
         <div className="text-xs text-gray-500 border-t border-gray-700/50 pt-4">
-          <span className="text-gray-400 font-medium">Benchmark: </span>{rec.comparable_successes}
+          <span className="text-gray-400 font-medium">Benchmark: </span>{toText(rec.comparable_successes)}
         </div>
       )}
     </div>

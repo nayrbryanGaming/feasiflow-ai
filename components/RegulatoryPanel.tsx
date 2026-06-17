@@ -1,6 +1,7 @@
 "use client";
 
 import type { RegulatoryResult } from "@/lib/types";
+import { toText, toTextList } from "@/lib/utils";
 
 interface Props {
   regulatory: RegulatoryResult;
@@ -32,6 +33,10 @@ function ScorePill({ score }: { score: number }) {
 export function RegulatoryPanel({ regulatory }: Props) {
   const score = regulatory.regulatory_feasibility_score ?? 0;
   const scoreColor = score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
+  const licenses = toTextList(regulatory.required_licenses);
+  const costDrivers = toTextList(regulatory.compliance_cost_breakdown?.main_cost_drivers);
+  const roadmap = toTextList(regulatory.compliance_roadmap);
+  const criticalRisks = toTextList(regulatory.critical_regulatory_risks);
 
   return (
     <div className="glass-card rounded-2xl p-6">
@@ -43,7 +48,7 @@ export function RegulatoryPanel({ regulatory }: Props) {
             <span>Regulatory Intelligence</span>
           </h3>
           <p className="text-gray-400 text-xs mt-1">
-            {regulatory.primary_regulator}
+            {toText(regulatory.primary_regulator)}
           </p>
         </div>
         <div className="text-right p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20">
@@ -72,7 +77,7 @@ export function RegulatoryPanel({ regulatory }: Props) {
                     <ScorePill score={dim.score} />
                   </div>
                   {dim.reasoning && (
-                    <p className="text-xs text-gray-500">{dim.reasoning}</p>
+                    <p className="text-xs text-gray-500">{toText(dim.reasoning)}</p>
                   )}
                 </div>
               );
@@ -83,11 +88,11 @@ export function RegulatoryPanel({ regulatory }: Props) {
 
       <div className="grid md:grid-cols-2 gap-4 mb-5">
         {/* Required Licenses */}
-        {regulatory.required_licenses?.length > 0 && (
+        {licenses.length > 0 && (
           <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
             <p className="text-xs font-bold text-blue-400 mb-2">📄 Izin yang Diperlukan</p>
             <ul className="space-y-1.5">
-              {regulatory.required_licenses.map((lic, i) => (
+              {licenses.map((lic, i) => (
                 <li key={i} className="text-xs text-gray-300 flex gap-1.5">
                   <span className="text-blue-400 shrink-0">{i + 1}.</span>{lic}
                 </li>
@@ -103,20 +108,20 @@ export function RegulatoryPanel({ regulatory }: Props) {
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
                 <span className="text-gray-500">Minimum:</span>
-                <span className="text-gray-200">{regulatory.compliance_cost_breakdown.minimum}</span>
+                <span className="text-gray-200">{toText(regulatory.compliance_cost_breakdown.minimum)}</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-gray-500">Realistis:</span>
-                <span className="text-yellow-300 font-bold">{regulatory.compliance_cost_breakdown.realistic}</span>
+                <span className="text-yellow-300 font-bold">{toText(regulatory.compliance_cost_breakdown.realistic)}</span>
               </div>
               <div className="flex justify-between text-xs">
                 <span className="text-gray-500">Maksimum:</span>
-                <span className="text-gray-200">{regulatory.compliance_cost_breakdown.maximum}</span>
+                <span className="text-gray-200">{toText(regulatory.compliance_cost_breakdown.maximum)}</span>
               </div>
-              {regulatory.compliance_cost_breakdown.main_cost_drivers?.length > 0 && (
+              {costDrivers.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-gray-700/50">
                   <p className="text-xs text-gray-500 mb-1">Driver biaya utama:</p>
-                  {regulatory.compliance_cost_breakdown.main_cost_drivers.map((d, i) => (
+                  {costDrivers.map((d, i) => (
                     <p key={i} className="text-xs text-gray-400">• {d}</p>
                   ))}
                 </div>
@@ -127,11 +132,11 @@ export function RegulatoryPanel({ regulatory }: Props) {
       </div>
 
       {/* Compliance Roadmap */}
-      {regulatory.compliance_roadmap?.length > 0 && (
+      {roadmap.length > 0 && (
         <div className="mb-5">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">🗓️ Compliance Roadmap</p>
           <div className="space-y-2">
-            {regulatory.compliance_roadmap.map((step, i) => (
+            {roadmap.map((step, i) => (
               <div key={i} className="flex gap-3 text-sm">
                 <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 shrink-0" />
                 <p className="text-gray-300">{step}</p>
@@ -142,10 +147,10 @@ export function RegulatoryPanel({ regulatory }: Props) {
       )}
 
       {/* Critical Regulatory Risks */}
-      {regulatory.critical_regulatory_risks?.length > 0 && (
+      {criticalRisks.length > 0 && (
         <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 mb-4">
           <p className="text-xs font-bold text-red-400 mb-2">🚨 Risiko Regulasi Kritis</p>
-          {regulatory.critical_regulatory_risks.map((r, i) => (
+          {criticalRisks.map((r, i) => (
             <p key={i} className="text-xs text-gray-300 mb-1 flex gap-1.5">
               <span className="text-red-400 shrink-0">!</span>{r}
             </p>
@@ -157,13 +162,13 @@ export function RegulatoryPanel({ regulatory }: Props) {
       {regulatory.quick_win_path && (
         <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4 mb-4">
           <p className="text-xs font-bold text-green-400 mb-1">⚡ Quick Win Path (30-90 hari)</p>
-          <p className="text-sm text-gray-300">{regulatory.quick_win_path}</p>
+          <p className="text-sm text-gray-300">{toText(regulatory.quick_win_path)}</p>
         </div>
       )}
 
       {/* Summary */}
       {regulatory.regulatory_summary && (
-        <p className="text-sm text-gray-400 border-t border-gray-700/50 pt-4">{regulatory.regulatory_summary}</p>
+        <p className="text-sm text-gray-400 border-t border-gray-700/50 pt-4">{toText(regulatory.regulatory_summary)}</p>
       )}
     </div>
   );

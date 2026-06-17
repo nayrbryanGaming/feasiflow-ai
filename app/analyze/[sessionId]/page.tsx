@@ -12,6 +12,8 @@ import { RiskMatrix } from "@/components/RiskMatrix";
 import { RegulatoryPanel } from "@/components/RegulatoryPanel";
 import { FinancialPanel } from "@/components/FinancialPanel";
 import { RecommendationPanel } from "@/components/RecommendationPanel";
+import { PanelBoundary } from "@/components/PanelBoundary";
+import { toTextList } from "@/lib/utils";
 import type { AnalysisResult } from "@/lib/types";
 
 // Loading placeholder emoji set (9 agents)
@@ -133,16 +135,18 @@ export default function ResultPage() {
               <>
                 {/* ── Agent 9: Feasibility Score (TOP) ───────────────────── */}
                 {result.recommendation?.feasibility_score && (
-                  <FeasibilityScore data={result.recommendation.feasibility_score} />
+                  <PanelBoundary name="Skor Kelayakan">
+                    <FeasibilityScore data={result.recommendation.feasibility_score} />
+                  </PanelBoundary>
                 )}
 
                 {/* ── Early warnings from Orchestrator ───────────────────── */}
-                {(result.orchestrator?.early_warnings?.length ?? 0) > 0 && (
+                {toTextList(result.orchestrator?.early_warnings).length > 0 && (
                   <div className="glass-card rounded-2xl p-5">
                     <h3 className="text-sm font-bold text-yellow-400 mb-3">
                       ⚠️ Peringatan Awal (dari Orchestrator)
                     </h3>
-                    {result.orchestrator.early_warnings.map((w, i) => (
+                    {toTextList(result.orchestrator?.early_warnings).map((w, i) => (
                       <div key={i} className="flex gap-2 text-sm text-gray-300 mb-1.5">
                         <span className="text-yellow-400 shrink-0">!</span>{w}
                       </div>
@@ -152,29 +156,59 @@ export default function ResultPage() {
 
                 {/* ── Agent 9: Strategic Recommendation ──────────────────── */}
                 {result.recommendation && (
-                  <RecommendationPanel rec={result.recommendation} />
+                  <PanelBoundary name="Rekomendasi Strategis">
+                    <RecommendationPanel rec={result.recommendation} />
+                  </PanelBoundary>
                 )}
 
                 {/* ── Agent 2: BMC ────────────────────────────────────────── */}
-                {result.bmc && <BMCDisplay bmc={result.bmc} />}
+                {result.bmc && (
+                  <PanelBoundary name="Business Model Canvas">
+                    <BMCDisplay bmc={result.bmc} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Agent 3: Market Research ────────────────────────────── */}
-                {result.market && <MarketChart market={result.market} />}
+                {result.market && (
+                  <PanelBoundary name="Market Research">
+                    <MarketChart market={result.market} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Agent 4: Competitor Analysis ────────────────────────── */}
-                {result.competitor && <CompetitorTable competitor={result.competitor} />}
+                {result.competitor && (
+                  <PanelBoundary name="Analisis Kompetitor">
+                    <CompetitorTable competitor={result.competitor} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Agent 5: Sentiment & Social Intelligence (NEW) ─────── */}
-                {result.sentiment && <SentimentPanel sentiment={result.sentiment} />}
+                {result.sentiment && (
+                  <PanelBoundary name="Sentiment & Social Intelligence">
+                    <SentimentPanel sentiment={result.sentiment} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Agent 6: Risk Analysis ──────────────────────────────── */}
-                {result.risk && <RiskMatrix risk={result.risk} />}
+                {result.risk && (
+                  <PanelBoundary name="Analisis Risiko">
+                    <RiskMatrix risk={result.risk} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Agent 7: Regulatory Intelligence (NEW) ─────────────── */}
-                {result.regulatory && <RegulatoryPanel regulatory={result.regulatory} />}
+                {result.regulatory && (
+                  <PanelBoundary name="Regulatory Intelligence">
+                    <RegulatoryPanel regulatory={result.regulatory} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Agent 8: Financial Modeling (NEW) ──────────────────── */}
-                {result.financial && <FinancialPanel financial={result.financial} />}
+                {result.financial && (
+                  <PanelBoundary name="Financial Modeling">
+                    <FinancialPanel financial={result.financial} />
+                  </PanelBoundary>
+                )}
 
                 {/* ── Footer ──────────────────────────────────────────────── */}
                 <div className="text-center py-8">

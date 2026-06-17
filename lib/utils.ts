@@ -46,3 +46,43 @@ export function formatElapsed(seconds: number): string {
   if (seconds < 60) return `${seconds.toFixed(1)}s`;
   return `${Math.floor(seconds / 60)}m ${(seconds % 60).toFixed(0)}s`;
 }
+
+// ── LLM output coercion ───────────────────────────────────────────────────────
+// The 9 agents are told to return string arrays, but across the model pool
+// (llama-3.3 / llama-4-scout / llama-3.1-8b / gpt-oss) they SOMETIMES return
+// objects (e.g. {point, detail}) or numbers instead. Rendering a raw object as
+// a React child throws "Objects are not valid as a React child" and blanks the
+// whole page. These helpers coerce any value to safe display text so the UI
+// never crashes regardless of the JSON shape the model emits.
+const PREFERRED_KEYS = [
+  "text", "point", "value", "description", "recommendation", "action",
+  "title", "name", "label", "detail", "summary", "item", "risk",
+  "challenge", "strength", "step", "factor", "reason", "insight",
+];
+
+export function toText(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.map(toText).filter(Boolean).join(" · ");
+  if (typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    for (const k of PREFERRED_KEYS) {
+      if (typeof o[k] === "string" && (o[k] as string).trim()) return o[k] as string;
+    }
+    const parts = Object.values(o)
+      .filter((v) => typeof v === "string" || typeof v === "number")
+      .map(String)
+      .filter(Boolean);
+    if (parts.length) return parts.join(" — ");
+    try { return JSON.stringify(value); } catch { return String(value); }
+  }
+  return String(value);
+}
+
+// Coerce a value that SHOULD be string[] into a clean string[] (drops empties).
+export function toTextList(value: unknown): string[] {
+  if (value == null) return [];
+  const arr = Array.isArray(value) ? value : [value];
+  return arr.map(toText).map((s) => s.trim()).filter(Boolean);
+}

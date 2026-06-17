@@ -1,11 +1,16 @@
 "use client";
 
-import { getScoreColor, getScoreBg, getScoreBorder } from "@/lib/utils";
+import { getScoreColor, getScoreBg, getScoreBorder, toText } from "@/lib/utils";
 import type { FeasibilityScore as FScore } from "@/lib/types";
 
+const num = (v: unknown): number => {
+  const n = typeof v === "number" ? v : parseFloat(String(v));
+  return Number.isFinite(n) ? n : 0;
+};
+
 export function FeasibilityScore({ data }: { data: FScore }) {
-  const total = data?.total_score ?? (data as any)?.total ?? 0;
-  const classification = data?.classification ?? (data as any)?.classification ?? "—";
+  const total = num(data?.total_score ?? (data as any)?.total);
+  const classification = toText(data?.classification ?? (data as any)?.classification) || "—";
   const breakdown = data?.breakdown ?? {};
   const scoreColor = getScoreColor(total);
   const scoreBg = getScoreBg(total);
@@ -16,59 +21,59 @@ export function FeasibilityScore({ data }: { data: FScore }) {
     {
       label: "Validasi Pasar",
       weight: "20%",
-      value: breakdown.market_score ?? 0,
-      contribution: breakdown.market_contribution ?? 0,
+      value: num(breakdown.market_score),
+      contribution: num(breakdown.market_contribution),
       color: "bg-blue-500",
     },
     {
       label: "Kekuatan Model Bisnis",
       weight: "18%",
-      value: breakdown.business_model_score ?? 0,
-      contribution: breakdown.business_model_contribution ?? 0,
+      value: num(breakdown.business_model_score),
+      contribution: num(breakdown.business_model_contribution),
       color: "bg-purple-500",
     },
     {
       label: "Profil Risiko",
       weight: "17%",
-      value: breakdown.risk_score ?? 0,
-      contribution: breakdown.risk_contribution ?? 0,
+      value: num(breakdown.risk_score),
+      contribution: num(breakdown.risk_contribution),
       color: "bg-amber-500",
     },
     {
       label: "Posisi Kompetitif",
       weight: "15%",
-      value: breakdown.competitive_advantage_score ?? 0,
-      contribution: breakdown.competitive_advantage_contribution ?? 0,
+      value: num(breakdown.competitive_advantage_score),
+      contribution: num(breakdown.competitive_advantage_contribution),
       color: "bg-emerald-500",
     },
     {
       label: "Keberlanjutan Finansial",
       weight: "12%",
-      value: breakdown.financial_sustainability_score ?? 0,
-      contribution: breakdown.financial_sustainability_contribution ?? 0,
+      value: num(breakdown.financial_sustainability_score),
+      contribution: num(breakdown.financial_sustainability_contribution),
       color: "bg-green-400",
     },
     {
       label: "Validasi Demand Publik",
       weight: "10%",
-      value: breakdown.demand_validation_score ?? 0,
-      contribution: breakdown.demand_validation_contribution ?? 0,
+      value: num(breakdown.demand_validation_score),
+      contribution: num(breakdown.demand_validation_contribution),
       color: "bg-pink-500",
     },
     {
       label: "Kelayakan Regulasi",
       weight: "8%",
-      value: breakdown.regulatory_feasibility_score ?? 0,
-      contribution: breakdown.regulatory_feasibility_contribution ?? 0,
+      value: num(breakdown.regulatory_feasibility_score),
+      contribution: num(breakdown.regulatory_feasibility_contribution),
       color: "bg-yellow-400",
     },
   ];
 
-  const gonogo = (data as any)?.go_nogo_recommendation
-    ?? (total >= 75 ? "GO" : total >= 55 ? "CONDITIONAL GO" : "NO-GO");
+  const gonogo = toText((data as any)?.go_nogo_recommendation)
+    || (total >= 75 ? "GO" : total >= 55 ? "CONDITIONAL GO" : "NO-GO");
 
-  const weakest = data?.weakest_dimension;
-  const strongest = data?.strongest_dimension;
+  const weakest = toText(data?.weakest_dimension);
+  const strongest = toText(data?.strongest_dimension);
 
   return (
     <div className="glass-card rounded-2xl p-6">
@@ -98,7 +103,7 @@ export function FeasibilityScore({ data }: { data: FScore }) {
         {/* Confidence */}
         {data?.confidence_level && (
           <p className="text-xs text-gray-500 mt-3">
-            Kepercayaan analisis: <span className="text-gray-300 font-medium capitalize">{data.confidence_level}</span>
+            Kepercayaan analisis: <span className="text-gray-300 font-medium capitalize">{toText(data.confidence_level)}</span>
           </p>
         )}
       </div>

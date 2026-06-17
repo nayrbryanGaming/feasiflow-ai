@@ -1,6 +1,7 @@
 "use client";
 
 import type { SentimentResult } from "@/lib/types";
+import { toText, toTextList } from "@/lib/utils";
 
 interface Props {
   sentiment: SentimentResult;
@@ -30,6 +31,8 @@ function ScoreBar({ score, size = "md" }: { score: number; size?: "sm" | "md" })
 }
 
 export function SentimentPanel({ sentiment }: Props) {
+  const painPoints = toTextList(sentiment.pain_point_evidence);
+  const positives = toTextList(sentiment.positive_signals);
   const score = sentiment.validated_demand_score ?? 0;
   const scoreColor = score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
   const bgColor = score >= 70 ? "from-green-500/10 to-emerald-500/5" : score >= 50 ? "from-yellow-500/10 to-amber-500/5" : "from-red-500/10 to-rose-500/5";
@@ -77,7 +80,7 @@ export function SentimentPanel({ sentiment }: Props) {
                   </div>
                   <ScoreBar score={dim.score} size="sm" />
                   {dim.evidence && (
-                    <p className="text-xs text-gray-500 mt-1 pl-1">{dim.evidence}</p>
+                    <p className="text-xs text-gray-500 mt-1 pl-1">{toText(dim.evidence)}</p>
                   )}
                 </div>
               );
@@ -88,11 +91,11 @@ export function SentimentPanel({ sentiment }: Props) {
 
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         {/* Pain Point Evidence */}
-        {sentiment.pain_point_evidence?.length > 0 && (
+        {painPoints.length > 0 && (
           <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
             <p className="text-xs font-bold text-red-400 mb-2">🔴 Bukti Pain Point Nyata</p>
             <ul className="space-y-1">
-              {sentiment.pain_point_evidence.map((e, i) => (
+              {painPoints.map((e, i) => (
                 <li key={i} className="text-xs text-gray-300 flex gap-1.5">
                   <span className="text-red-400 mt-0.5 shrink-0">•</span>{e}
                 </li>
@@ -102,11 +105,11 @@ export function SentimentPanel({ sentiment }: Props) {
         )}
 
         {/* Positive Signals */}
-        {sentiment.positive_signals?.length > 0 && (
+        {positives.length > 0 && (
           <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
             <p className="text-xs font-bold text-green-400 mb-2">🟢 Sinyal Positif</p>
             <ul className="space-y-1">
-              {sentiment.positive_signals.map((s, i) => (
+              {positives.map((s, i) => (
                 <li key={i} className="text-xs text-gray-300 flex gap-1.5">
                   <span className="text-green-400 mt-0.5 shrink-0">+</span>{s}
                 </li>
@@ -120,7 +123,7 @@ export function SentimentPanel({ sentiment }: Props) {
       {sentiment.key_insight && (
         <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-4">
           <p className="text-xs font-bold text-blue-400 mb-1">💡 Key Insight</p>
-          <p className="text-sm text-gray-200">{sentiment.key_insight}</p>
+          <p className="text-sm text-gray-200">{toText(sentiment.key_insight)}</p>
         </div>
       )}
 
@@ -128,13 +131,13 @@ export function SentimentPanel({ sentiment }: Props) {
       {sentiment.target_community && (
         <div className="flex gap-2 items-start text-xs text-gray-400 mb-3">
           <span className="text-purple-400 shrink-0">👥</span>
-          <span><strong className="text-gray-300">Early Adopter Target:</strong> {sentiment.target_community}</span>
+          <span><strong className="text-gray-300">Early Adopter Target:</strong> {toText(sentiment.target_community)}</span>
         </div>
       )}
 
       {/* Summary */}
       {sentiment.sentiment_summary && (
-        <p className="text-sm text-gray-300 border-t border-gray-700/50 pt-4">{sentiment.sentiment_summary}</p>
+        <p className="text-sm text-gray-300 border-t border-gray-700/50 pt-4">{toText(sentiment.sentiment_summary)}</p>
       )}
     </div>
   );
