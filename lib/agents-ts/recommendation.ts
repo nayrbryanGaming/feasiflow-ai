@@ -122,10 +122,11 @@ Jika kualitas input rendah, JANGAN beri skor tinggi — jelaskan keterbatasannya
   const result = parseJson(content);
 
   // Transparent penalty: scale the weighted score by input quality, hard-cap
-  // for garbage input. This is what stops random input from scoring ~68.
-  const qualityMult = 0.4 + 0.6 * (inputQuality / 100);   // 0.40 .. 1.00
+  // for garbage input. Stops random input from scoring high, while letting a
+  // strong, specific idea keep most of its weighted score.
+  const qualityMult = 0.55 + 0.45 * (inputQuality / 100);  // 0.55 .. 1.00
   let adjusted = Math.round(totalScore * qualityMult);
-  if (inputQuality < 25) adjusted = Math.min(adjusted, 30);
+  if (inputQuality < 25) adjusted = Math.min(adjusted, 30); // garbage hard cap
   adjusted = Math.max(1, Math.min(100, adjusted));
 
   result.base_score = totalScore;
