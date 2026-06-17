@@ -1,7 +1,7 @@
 "use client";
 
 import type { RegulatoryResult } from "@/lib/types";
-import { toText, toTextList } from "@/lib/utils";
+import { toText, toTextList, toNum } from "@/lib/utils";
 
 interface Props {
   regulatory: RegulatoryResult;
@@ -31,7 +31,7 @@ function ScorePill({ score }: { score: number }) {
 }
 
 export function RegulatoryPanel({ regulatory }: Props) {
-  const score = regulatory.regulatory_feasibility_score ?? 0;
+  const score = toNum(regulatory.regulatory_feasibility_score);
   const scoreColor = score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
   const licenses = toTextList(regulatory.required_licenses);
   const costDrivers = toTextList(regulatory.compliance_cost_breakdown?.main_cost_drivers);
@@ -65,16 +65,17 @@ export function RegulatoryPanel({ regulatory }: Props) {
             7 Sifat Penilaian Regulasi
           </p>
           <div className="space-y-2">
-            {(Object.entries(regulatory.regulatory_dimensions) as [string, { score: number; reasoning: string }][]).map(([key, dim]) => {
+            {(Object.entries(regulatory.regulatory_dimensions) as [string, any][]).map(([key, dimRaw]) => {
               const cfg = DIM_CONFIG[key];
               if (!cfg) return null;
+              const dim = (dimRaw && typeof dimRaw === "object" ? dimRaw : {}) as any;
               return (
                 <div key={key} className="bg-gray-800/40 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium text-gray-200">
                       {cfg.icon} {cfg.label}
                     </span>
-                    <ScorePill score={dim.score} />
+                    <ScorePill score={toNum(dim.score)} />
                   </div>
                   {dim.reasoning && (
                     <p className="text-xs text-gray-500">{toText(dim.reasoning)}</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import type { AnalysisResult } from "@/lib/types";
-import { toText, toTextList } from "@/lib/utils";
+import { toText, toTextList, toNum } from "@/lib/utils";
 
 export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
   // Cast to any for LLM-generated dynamic sub-fields
@@ -98,7 +98,7 @@ export function BMCDisplay({ bmc }: { bmc: AnalysisResult["bmc"] }) {
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-xl font-bold">📊 Business Model Canvas</h2>
         <span className="text-2xl font-black text-purple-400">
-          {bmc.business_model_score}<span className="text-sm text-gray-500">/100</span>
+          {toNum(bmc.business_model_score)}<span className="text-sm text-gray-500">/100</span>
         </span>
       </div>
       {bmc.bmc_summary && (

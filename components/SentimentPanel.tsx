@@ -1,7 +1,7 @@
 "use client";
 
 import type { SentimentResult } from "@/lib/types";
-import { toText, toTextList } from "@/lib/utils";
+import { toText, toTextList, toNum } from "@/lib/utils";
 
 interface Props {
   sentiment: SentimentResult;
@@ -33,7 +33,7 @@ function ScoreBar({ score, size = "md" }: { score: number; size?: "sm" | "md" })
 export function SentimentPanel({ sentiment }: Props) {
   const painPoints = toTextList(sentiment.pain_point_evidence);
   const positives = toTextList(sentiment.positive_signals);
-  const score = sentiment.validated_demand_score ?? 0;
+  const score = toNum(sentiment.validated_demand_score);
   const scoreColor = score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
   const bgColor = score >= 70 ? "from-green-500/10 to-emerald-500/5" : score >= 50 ? "from-yellow-500/10 to-amber-500/5" : "from-red-500/10 to-rose-500/5";
 
@@ -64,9 +64,11 @@ export function SentimentPanel({ sentiment }: Props) {
             7 Sifat Penilaian Sentimen
           </p>
           <div className="space-y-3">
-            {(Object.entries(sentiment.sentiment_dimensions) as [string, { score: number; evidence: string }][]).map(([key, dim]) => {
+            {(Object.entries(sentiment.sentiment_dimensions) as [string, any][]).map(([key, dimRaw]) => {
               const config = DIMENSION_CONFIG[key as keyof typeof DIMENSION_CONFIG];
               if (!config) return null;
+              const dim = (dimRaw && typeof dimRaw === "object" ? dimRaw : {}) as any;
+              const dimScore = toNum(dim.score);
               return (
                 <div key={key}>
                   <div className="flex items-center justify-between mb-1">
@@ -74,11 +76,11 @@ export function SentimentPanel({ sentiment }: Props) {
                       <span className="text-sm font-medium text-gray-200">{config.label}</span>
                       <span className="text-xs text-gray-500 ml-2">{config.description}</span>
                     </div>
-                    <span className={`text-sm font-bold ${dim.score >= 70 ? "text-green-400" : dim.score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
-                      {dim.score}
+                    <span className={`text-sm font-bold ${dimScore >= 70 ? "text-green-400" : dimScore >= 50 ? "text-yellow-400" : "text-red-400"}`}>
+                      {dimScore}
                     </span>
                   </div>
-                  <ScoreBar score={dim.score} size="sm" />
+                  <ScoreBar score={dimScore} size="sm" />
                   {dim.evidence && (
                     <p className="text-xs text-gray-500 mt-1 pl-1">{toText(dim.evidence)}</p>
                   )}

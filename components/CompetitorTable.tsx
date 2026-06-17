@@ -1,12 +1,13 @@
 "use client";
 
 import type { AnalysisResult } from "@/lib/types";
-import { toText, toTextList } from "@/lib/utils";
+import { toText, toTextList, toNum } from "@/lib/utils";
 
 export function CompetitorTable({ competitor }: { competitor: AnalysisResult["competitor"] }) {
   const c = competitor as any;
   const marketGaps = toTextList(competitor?.market_gaps);
   const barriers = toTextList(c?.entry_barriers ?? c?.key_competitive_risks);
+  const competitors = Array.isArray(competitor?.direct_competitors) ? competitor!.direct_competitors : [];
 
   return (
     <div className="glass-card rounded-2xl p-6">
@@ -14,7 +15,7 @@ export function CompetitorTable({ competitor }: { competitor: AnalysisResult["co
         <h2 className="text-xl font-bold">🔍 Analisis Kompetitor</h2>
         <div className="text-right">
           <span className="text-2xl font-black text-cyan-400">
-            {competitor?.competitive_advantage_score}<span className="text-sm text-gray-500">/100</span>
+            {toNum(competitor?.competitive_advantage_score)}<span className="text-sm text-gray-500">/100</span>
           </span>
         </div>
       </div>
@@ -49,11 +50,11 @@ export function CompetitorTable({ competitor }: { competitor: AnalysisResult["co
       )}
 
       {/* Direct competitors */}
-      {(competitor?.direct_competitors?.length ?? 0) > 0 && (
+      {competitors.length > 0 && (
         <>
           <h3 className="text-sm font-bold text-gray-300 mb-3">Kompetitor Langsung</h3>
           <div className="space-y-4 mb-5">
-            {competitor!.direct_competitors.map((comp, i) => (
+            {competitors.map((comp: any, i: number) => (
               <div key={i} className="border border-gray-700 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div>

@@ -86,3 +86,9 @@ export function toTextList(value: unknown): string[] {
   const arr = Array.isArray(value) ? value : [value];
   return arr.map(toText).map((s) => s.trim()).filter(Boolean);
 }
+
+// Coerce a value that SHOULD be a number (LLM sometimes sends strings/objects).
+export function toNum(value: unknown): number {
+  const n = typeof value === "number" ? value : parseFloat(String(value));
+  return Number.isFinite(n) ? n : 0;
+}

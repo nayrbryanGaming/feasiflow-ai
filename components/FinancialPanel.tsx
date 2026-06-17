@@ -1,7 +1,7 @@
 "use client";
 
 import type { FinancialResult } from "@/lib/types";
-import { toText, toTextList } from "@/lib/utils";
+import { toText, toTextList, toNum } from "@/lib/utils";
 
 interface Props {
   financial: FinancialResult;
@@ -36,7 +36,7 @@ function RunwayGauge({ months }: { months: number }) {
 }
 
 export function FinancialPanel({ financial }: Props) {
-  const score = financial.financial_sustainability_score ?? 0;
+  const score = toNum(financial.financial_sustainability_score);
   const scoreColor = score >= 70 ? "text-green-400" : score >= 50 ? "text-yellow-400" : "text-red-400";
   const runway = financial.runway_projection;
   const fixedCosts = toTextList(financial.cost_structure?.fixed_costs);
@@ -114,20 +114,22 @@ export function FinancialPanel({ financial }: Props) {
             7 Sifat Penilaian Finansial
           </p>
           <div className="space-y-2">
-            {(Object.entries(financial.financial_dimensions) as [string, { score: number; reasoning: string }][]).map(([key, dim]) => {
+            {(Object.entries(financial.financial_dimensions) as [string, any][]).map(([key, dimRaw]) => {
               const cfg = FIN_DIM_CONFIG[key];
               if (!cfg) return null;
-              const barColor = dim.score >= 70 ? "bg-green-500" : dim.score >= 50 ? "bg-yellow-500" : "bg-red-500";
+              const dim = (dimRaw && typeof dimRaw === "object" ? dimRaw : {}) as any;
+              const dimScore = toNum(dim.score);
+              const barColor = dimScore >= 70 ? "bg-green-500" : dimScore >= 50 ? "bg-yellow-500" : "bg-red-500";
               return (
                 <div key={key}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-gray-300">{cfg.icon} {cfg.label}</span>
-                    <span className={`text-xs font-bold ${dim.score >= 70 ? "text-green-400" : dim.score >= 50 ? "text-yellow-400" : "text-red-400"}`}>
-                      {dim.score}
+                    <span className={`text-xs font-bold ${dimScore >= 70 ? "text-green-400" : dimScore >= 50 ? "text-yellow-400" : "text-red-400"}`}>
+                      {dimScore}
                     </span>
                   </div>
                   <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                    <div className={`h-full ${barColor} rounded-full`} style={{ width: `${dim.score}%` }} />
+                    <div className={`h-full ${barColor} rounded-full`} style={{ width: `${dimScore}%` }} />
                   </div>
                   {dim.reasoning && <p className="text-xs text-gray-600 mt-0.5">{toText(dim.reasoning)}</p>}
                 </div>
