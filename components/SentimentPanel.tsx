@@ -21,7 +21,7 @@ function ScoreBar({ score, size = "md" }: { score: number; size?: "sm" | "md" })
   const color = score >= 70 ? "bg-green-500" : score >= 50 ? "bg-yellow-500" : "bg-red-500";
   const h = size === "sm" ? "h-1.5" : "h-2";
   return (
-    <div className={`w-full bg-gray-700 rounded-full ${h} overflow-hidden`}>
+    <div className={`w-full bg-white/[0.08] rounded-full ${h} overflow-hidden`}>
       <div
         className={`${h} ${color} rounded-full transition-all duration-700`}
         style={{ width: `${score}%` }}
@@ -42,22 +42,22 @@ export function SentimentPanel({ sentiment }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold">Sentiment &amp; Social Intelligence</h3>
-          <p className="text-gray-400 text-xs mt-1">
+          <h3 className="text-base font-semibold">Sentiment &amp; Social Intelligence</h3>
+          <p className="text-muted text-xs mt-1">
             7 metode scraping real-time · Validasi demand publik
           </p>
         </div>
         <div className={`text-right p-3 rounded-xl bg-gradient-to-br ${bgColor} border border-white/5`}>
-          <p className="text-xs text-gray-400">Demand Score</p>
-          <p className={`text-3xl font-black ${scoreColor}`}>{score}</p>
-          <p className="text-xs text-gray-500">/100</p>
+          <p className="text-xs text-muted">Demand Score</p>
+          <p className={`text-3xl font-semibold tnum ${scoreColor}`}>{score}</p>
+          <p className="text-xs text-faint">/100</p>
         </div>
       </div>
 
       {/* 7 Sentiment Dimensions */}
       {sentiment.sentiment_dimensions && (
         <div className="mb-6">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <p className="text-[11px] font-semibold text-faint uppercase tracking-wider mb-3">
             7 Sifat Penilaian Sentimen
           </p>
           <div className="space-y-3">
@@ -70,8 +70,8 @@ export function SentimentPanel({ sentiment }: Props) {
                 <div key={key}>
                   <div className="flex items-center justify-between mb-1">
                     <div>
-                      <span className="text-sm font-medium text-gray-200">{config.label}</span>
-                      <span className="text-xs text-gray-500 ml-2">{config.description}</span>
+                      <span className="text-sm font-medium text-fg">{config.label}</span>
+                      <span className="text-xs text-faint ml-2">{config.description}</span>
                     </div>
                     <span className={`text-sm font-bold ${dimScore >= 70 ? "text-green-400" : dimScore >= 50 ? "text-yellow-400" : "text-red-400"}`}>
                       {dimScore}
@@ -79,7 +79,7 @@ export function SentimentPanel({ sentiment }: Props) {
                   </div>
                   <ScoreBar score={dimScore} size="sm" />
                   {dim.evidence && (
-                    <p className="text-xs text-gray-500 mt-1 pl-1">{toText(dim.evidence)}</p>
+                    <p className="text-xs text-faint mt-1 pl-1">{toText(dim.evidence)}</p>
                   )}
                 </div>
               );
@@ -95,7 +95,7 @@ export function SentimentPanel({ sentiment }: Props) {
             <p className="text-xs font-bold text-red-400 mb-2">Bukti Pain Point Nyata</p>
             <ul className="space-y-1">
               {painPoints.map((e, i) => (
-                <li key={i} className="text-xs text-gray-300 flex gap-1.5">
+                <li key={i} className="text-xs text-muted flex gap-1.5">
                   <span className="text-red-400 mt-0.5 shrink-0">•</span>{e}
                 </li>
               ))}
@@ -109,7 +109,7 @@ export function SentimentPanel({ sentiment }: Props) {
             <p className="text-xs font-bold text-green-400 mb-2">Sinyal Positif</p>
             <ul className="space-y-1">
               {positives.map((s, i) => (
-                <li key={i} className="text-xs text-gray-300 flex gap-1.5">
+                <li key={i} className="text-xs text-muted flex gap-1.5">
                   <span className="text-green-400 mt-0.5 shrink-0">+</span>{s}
                 </li>
               ))}
@@ -120,15 +120,15 @@ export function SentimentPanel({ sentiment }: Props) {
 
       {/* Key Insight */}
       {sentiment.key_insight && (
-        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 mb-4">
-          <p className="text-xs font-bold text-blue-400 mb-1">Key Insight</p>
-          <p className="text-sm text-gray-200">{toText(sentiment.key_insight)}</p>
+        <div className="bg-accent/[0.05] border border-accent/20 rounded-xl p-4 mb-4">
+          <p className="text-[11px] font-semibold text-accent-fg mb-1">Key Insight</p>
+          <p className="text-sm text-fg">{toText(sentiment.key_insight)}</p>
         </div>
       )}
 
       {/* Target Community */}
       {sentiment.target_community && (
-        <div className="flex gap-2 items-start text-xs text-gray-400 mb-3">
+        <div className="flex gap-2 items-start text-xs text-muted mb-3">
           <span className="text-purple-400 shrink-0"></span>
           <span><strong className="text-gray-300">Early Adopter Target:</strong> {toText(sentiment.target_community)}</span>
         </div>
@@ -136,7 +136,7 @@ export function SentimentPanel({ sentiment }: Props) {
 
       {/* Summary */}
       {sentiment.sentiment_summary && (
-        <p className="text-sm text-gray-300 border-t border-gray-700/50 pt-4">{toText(sentiment.sentiment_summary)}</p>
+        <p className="text-sm text-muted border-t border-white/[0.06] pt-4">{toText(sentiment.sentiment_summary)}</p>
       )}
     </div>
   );

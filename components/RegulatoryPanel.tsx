@@ -43,22 +43,22 @@ export function RegulatoryPanel({ regulatory }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold">Regulatory Intelligence</h3>
-          <p className="text-gray-400 text-xs mt-1">
+          <h3 className="text-base font-semibold">Regulatory Intelligence</h3>
+          <p className="text-muted text-xs mt-1">
             {toText(regulatory.primary_regulator)}
           </p>
         </div>
         <div className="text-right p-3 rounded-xl bg-yellow-500/5 border border-yellow-500/20">
-          <p className="text-xs text-gray-400">Regulatory Score</p>
-          <p className={`text-3xl font-black ${scoreColor}`}>{score}</p>
-          <p className="text-xs text-gray-500">/100</p>
+          <p className="text-xs text-muted">Regulatory Score</p>
+          <p className={`text-3xl font-semibold tnum ${scoreColor}`}>{score}</p>
+          <p className="text-xs text-faint">/100</p>
         </div>
       </div>
 
       {/* 7 Regulatory Dimensions */}
       {regulatory.regulatory_dimensions && (
         <div className="mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <p className="text-[11px] font-semibold text-faint uppercase tracking-wider mb-3">
             7 Sifat Penilaian Regulasi
           </p>
           <div className="space-y-2">
@@ -67,13 +67,13 @@ export function RegulatoryPanel({ regulatory }: Props) {
               if (!cfg) return null;
               const dim = (dimRaw && typeof dimRaw === "object" ? dimRaw : {}) as any;
               return (
-                <div key={key} className="bg-gray-800/40 rounded-lg p-3">
+                <div key={key} className="bg-white/[0.03] border border-white/[0.05] rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-200">{cfg.label}</span>
+                    <span className="text-sm font-medium text-fg">{cfg.label}</span>
                     <ScorePill score={toNum(dim.score)} />
                   </div>
                   {dim.reasoning && (
-                    <p className="text-xs text-gray-500">{toText(dim.reasoning)}</p>
+                    <p className="text-xs text-faint">{toText(dim.reasoning)}</p>
                   )}
                 </div>
               );
@@ -85,11 +85,11 @@ export function RegulatoryPanel({ regulatory }: Props) {
       <div className="grid md:grid-cols-2 gap-4 mb-5">
         {/* Required Licenses */}
         {licenses.length > 0 && (
-          <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
-            <p className="text-xs font-bold text-blue-400 mb-2">Izin yang Diperlukan</p>
+          <div className="bg-accent/[0.04] border border-accent/20 rounded-xl p-4">
+            <p className="text-[11px] font-semibold text-accent-fg mb-2">Izin yang Diperlukan</p>
             <ul className="space-y-1.5">
               {licenses.map((lic, i) => (
-                <li key={i} className="text-xs text-gray-300 flex gap-1.5">
+                <li key={i} className="text-xs text-muted flex gap-1.5">
                   <span className="text-blue-400 shrink-0">{i + 1}.</span>{lic}
                 </li>
               ))}
@@ -115,10 +115,10 @@ export function RegulatoryPanel({ regulatory }: Props) {
                 <span className="text-gray-200">{toText(regulatory.compliance_cost_breakdown.maximum)}</span>
               </div>
               {costDrivers.length > 0 && (
-                <div className="mt-2 pt-2 border-t border-gray-700/50">
-                  <p className="text-xs text-gray-500 mb-1">Driver biaya utama:</p>
+                <div className="mt-2 pt-2 border-t border-white/[0.06]">
+                  <p className="text-xs text-faint mb-1">Driver biaya utama:</p>
                   {costDrivers.map((d, i) => (
-                    <p key={i} className="text-xs text-gray-400">• {d}</p>
+                    <p key={i} className="text-xs text-muted">• {d}</p>
                   ))}
                 </div>
               )}
@@ -130,7 +130,7 @@ export function RegulatoryPanel({ regulatory }: Props) {
       {/* Compliance Roadmap */}
       {roadmap.length > 0 && (
         <div className="mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Compliance Roadmap</p>
+          <p className="text-[11px] font-semibold text-faint uppercase tracking-wider mb-3">Compliance Roadmap</p>
           <div className="space-y-2">
             {roadmap.map((step, i) => (
               <div key={i} className="flex gap-3 text-sm">
@@ -158,13 +158,13 @@ export function RegulatoryPanel({ regulatory }: Props) {
       {regulatory.quick_win_path && (
         <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4 mb-4">
           <p className="text-xs font-bold text-green-400 mb-1">Quick Win Path (30-90 hari)</p>
-          <p className="text-sm text-gray-300">{toText(regulatory.quick_win_path)}</p>
+          <p className="text-sm text-muted">{toText(regulatory.quick_win_path)}</p>
         </div>
       )}
 
       {/* Summary */}
       {regulatory.regulatory_summary && (
-        <p className="text-sm text-gray-400 border-t border-gray-700/50 pt-4">{toText(regulatory.regulatory_summary)}</p>
+        <p className="text-sm text-gray-400 border-t border-white/[0.06] pt-4">{toText(regulatory.regulatory_summary)}</p>
       )}
     </div>
   );

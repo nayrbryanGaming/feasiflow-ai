@@ -25,10 +25,10 @@ function RunwayGauge({ months }: { months: number }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-gray-400">Runway</span>
+        <span className="text-xs text-muted">Runway</span>
         <span className={`text-xs font-bold ${textColor}`}>{months} bulan — {label}</span>
       </div>
-      <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className="h-2 bg-white/[0.08] rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -48,36 +48,36 @@ export function FinancialPanel({ financial }: Props) {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold">Financial Modeling</h3>
-          <p className="text-gray-400 text-xs mt-1">
+          <h3 className="text-base font-semibold">Financial Modeling</h3>
+          <p className="text-muted text-xs mt-1">
             Proyeksi keuangan · Unit economics · Runway
           </p>
         </div>
         <div className="text-right p-3 rounded-xl bg-green-500/5 border border-green-500/20">
-          <p className="text-xs text-gray-400">Financial Score</p>
-          <p className={`text-3xl font-black ${scoreColor}`}>{score}</p>
-          <p className="text-xs text-gray-500">/100</p>
+          <p className="text-xs text-muted">Financial Score</p>
+          <p className={`text-3xl font-semibold tnum ${scoreColor}`}>{score}</p>
+          <p className="text-xs text-faint">/100</p>
         </div>
       </div>
 
       {/* Runway Projection */}
       {runway && (
-        <div className="bg-gray-800/60 rounded-xl p-4 mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Proyeksi Runway</p>
+        <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 mb-5">
+          <p className="text-[11px] font-semibold text-faint uppercase tracking-wider mb-3">Proyeksi Runway</p>
           <div className="grid grid-cols-3 gap-3 mb-3">
             <div className="text-center">
-              <p className="text-xs text-gray-500">Modal Awal</p>
-              <p className="text-sm font-bold text-gray-200">
+              <p className="text-xs text-faint">Modal Awal</p>
+              <p className="text-sm font-semibold text-fg">
                 {runway.initial_capital_idr ? `Rp${(runway.initial_capital_idr / 1_000_000).toFixed(0)}Jt` : "—"}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500">Burn Rate/Bulan</p>
+              <p className="text-xs text-faint">Burn Rate/Bulan</p>
               <p className="text-sm font-bold text-orange-300">{toText(runway.estimated_monthly_burn) || "—"}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-500">Assessment</p>
-              <p className="text-sm font-bold text-gray-200">{toText(runway.runway_assessment) || "—"}</p>
+              <p className="text-xs text-faint">Assessment</p>
+              <p className="text-sm font-semibold text-fg">{toText(runway.runway_assessment) || "—"}</p>
             </div>
           </div>
           {runway.runway_months > 0 && <RunwayGauge months={runway.runway_months} />}
@@ -87,7 +87,7 @@ export function FinancialPanel({ financial }: Props) {
       {/* Revenue Projection */}
       {financial.revenue_projection && (
         <div className="mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Proyeksi Revenue</p>
+          <p className="text-[11px] font-semibold text-faint uppercase tracking-wider mb-3">Proyeksi Revenue</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {[
               { label: "Bulan 3", value: financial.revenue_projection.month_3 },
@@ -95,8 +95,8 @@ export function FinancialPanel({ financial }: Props) {
               { label: "Bulan 12", value: financial.revenue_projection.month_12 },
               { label: "Break Even", value: financial.revenue_projection.break_even_month },
             ].map(({ label, value }) => (
-              <div key={label} className="bg-gray-800/40 rounded-lg p-3 text-center">
-                <p className="text-xs text-gray-500 mb-1">{label}</p>
+              <div key={label} className="bg-white/[0.03] border border-white/[0.05] rounded-lg p-3 text-center">
+                <p className="text-xs text-faint mb-1">{label}</p>
                 <p className="text-xs font-bold text-green-300">{toText(value) || "—"}</p>
               </div>
             ))}
@@ -107,7 +107,7 @@ export function FinancialPanel({ financial }: Props) {
       {/* 7 Financial Dimensions */}
       {financial.financial_dimensions && (
         <div className="mb-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <p className="text-[11px] font-semibold text-faint uppercase tracking-wider mb-3">
             7 Sifat Penilaian Finansial
           </p>
           <div className="space-y-2">
@@ -120,15 +120,15 @@ export function FinancialPanel({ financial }: Props) {
               return (
                 <div key={key}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-300">{cfg.label}</span>
+                    <span className="text-xs text-muted">{cfg.label}</span>
                     <span className={`text-xs font-bold ${dimScore >= 70 ? "text-green-400" : dimScore >= 50 ? "text-yellow-400" : "text-red-400"}`}>
                       {dimScore}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
                     <div className={`h-full ${barColor} rounded-full`} style={{ width: `${dimScore}%` }} />
                   </div>
-                  {dim.reasoning && <p className="text-xs text-gray-600 mt-0.5">{toText(dim.reasoning)}</p>}
+                  {dim.reasoning && <p className="text-xs text-faint mt-0.5">{toText(dim.reasoning)}</p>}
                 </div>
               );
             })}
@@ -139,13 +139,13 @@ export function FinancialPanel({ financial }: Props) {
       <div className="grid md:grid-cols-2 gap-4 mb-4">
         {/* Cost Structure */}
         {financial.cost_structure && (
-          <div className="bg-gray-800/40 rounded-xl p-4">
-            <p className="text-xs font-bold text-gray-400 mb-2">Struktur Biaya</p>
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-[11px] font-semibold text-faint mb-2">Struktur Biaya</p>
             {fixedCosts.length > 0 && (
               <>
-                <p className="text-xs text-gray-500 mb-1">Fixed Costs:</p>
+                <p className="text-xs text-faint mb-1">Fixed Costs:</p>
                 {fixedCosts.map((c, i) => (
-                  <p key={i} className="text-xs text-gray-300 mb-0.5">• {c}</p>
+                  <p key={i} className="text-xs text-muted mb-0.5">• {c}</p>
                 ))}
               </>
             )}
@@ -159,12 +159,12 @@ export function FinancialPanel({ financial }: Props) {
 
         {/* Funding Recommendation */}
         {financial.funding_recommendation && (
-          <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
-            <p className="text-xs font-bold text-blue-400 mb-2">Rekomendasi Pendanaan</p>
+          <div className="bg-accent/[0.04] border border-accent/20 rounded-xl p-4">
+            <p className="text-[11px] font-semibold text-accent-fg mb-2">Rekomendasi Pendanaan</p>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between">
                 <span className="text-gray-500">Jenis:</span>
-                <span className="text-gray-200">{toText(financial.funding_recommendation.investor_type)}</span>
+                <span className="text-fg">{toText(financial.funding_recommendation.investor_type)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Jumlah:</span>
@@ -172,7 +172,7 @@ export function FinancialPanel({ financial }: Props) {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Timing:</span>
-                <span className="text-gray-300">{toText(financial.funding_recommendation.next_fundraise_timing)}</span>
+                <span className="text-muted">{toText(financial.funding_recommendation.next_fundraise_timing)}</span>
               </div>
               {useOfFunds.length > 0 && (
                 <div className="mt-2 pt-2 border-t border-gray-700/50">
@@ -192,7 +192,7 @@ export function FinancialPanel({ financial }: Props) {
         <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 mb-4">
           <p className="text-xs font-bold text-red-400 mb-2">Risiko Finansial</p>
           {financialRisks.map((r, i) => (
-            <p key={i} className="text-xs text-gray-300 mb-1 flex gap-1.5">
+            <p key={i} className="text-xs text-muted mb-1 flex gap-1.5">
               <span className="text-red-400 shrink-0">!</span>{r}
             </p>
           ))}
@@ -201,7 +201,7 @@ export function FinancialPanel({ financial }: Props) {
 
       {/* Summary */}
       {financial.financial_summary && (
-        <p className="text-sm text-gray-300 border-t border-gray-700/50 pt-4">{toText(financial.financial_summary)}</p>
+        <p className="text-sm text-muted border-t border-white/[0.06] pt-4">{toText(financial.financial_summary)}</p>
       )}
     </div>
   );

@@ -104,28 +104,40 @@ export default function AnalyzePage() {
     }
   };
 
-  const inputCls = "w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors";
-  const labelCls = "block text-sm font-medium text-gray-300 mb-2";
-  const errCls = "text-red-400 text-xs mt-1";
+  const inputCls = "w-full bg-white/[0.03] border border-white/10 rounded-lg px-4 py-2.5 text-fg placeholder:text-faint focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/35 transition-[border-color,box-shadow] duration-150";
+  const labelCls = "block text-sm font-medium text-muted mb-2";
+  const errCls = "text-rose-400 text-xs mt-1.5";
+  const stepLabels = ["Informasi Industri", "Tim & Modal", "Deskripsi Ide"];
 
   return (
-    <div className="min-h-screen bg-gray-950 py-12 px-4">
+    <div className="min-h-screen py-14 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-10">
-          <a href="/" className="text-blue-400 text-sm hover:text-blue-300 mb-4 inline-block">Kembali ke Beranda</a>
-          <h1 className="text-3xl font-black">Analisis Kelayakan Startup</h1>
-          <p className="text-gray-400 mt-2">Isi parameter untuk memulai analisis 9-agen · 7 sifat penilaian · 7 metode scraping</p>
+        <div className="text-center mb-9">
+          <a href="/" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg transition-colors duration-150 mb-5 focus-ring rounded">
+            <ArrowLeft size={15} aria-hidden="true" /> Beranda
+          </a>
+          <h1 className="text-3xl font-semibold tracking-tight">Analisis Kelayakan Startup</h1>
+          <p className="text-muted mt-2.5 text-[15px]">Isi parameter untuk menjalankan analisis 9 agen AI.</p>
         </div>
 
         {/* Progress */}
-        <div className="flex gap-2 mb-8">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={`h-1.5 flex-1 rounded-full transition-colors ${s <= step ? "bg-blue-500" : "bg-gray-700"}`}
-            />
-          ))}
+        <div className="mb-9">
+          <div className="flex items-center justify-between mb-2.5">
+            {stepLabels.map((label, i) => (
+              <span key={label} className={`text-xs font-medium transition-colors duration-150 ${i + 1 <= step ? "text-accent-fg" : "text-faint"}`}>
+                {i + 1}. {label}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-1.5">
+            {[1, 2, 3].map((s) => (
+              <div
+                key={s}
+                className={`h-1 flex-1 rounded-full transition-colors duration-300 ${s <= step ? "bg-accent" : "bg-white/10"}`}
+              />
+            ))}
+          </div>
         </div>
 
         <form onSubmit={(e) => { e.preventDefault(); forceSubmit(); }} className="space-y-6">
@@ -133,7 +145,7 @@ export default function AnalyzePage() {
           {/* Step 1: Industry */}
           {step === 1 && (
             <div className="glass-card rounded-2xl p-6 space-y-5">
-              <h2 className="text-lg font-bold text-blue-400">Step 1: Informasi Industri</h2>
+              <h2 className="text-base font-semibold text-fg mb-1">Langkah 1: Informasi Industri</h2>
 
               <div>
                 <label className={labelCls}>Kategori Industri *</label>
@@ -160,7 +172,7 @@ export default function AnalyzePage() {
                     <label key={m} className="flex-1 cursor-pointer">
                       <input type="radio" value={m} {...register("operatingModel")} className="sr-only" />
                       <div className={`text-center py-3 rounded-lg border text-sm font-medium transition-colors ${
-                        selectedModel === m ? "bg-blue-600 border-blue-500 text-white" : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
+                        selectedModel === m ? "bg-accent border-accent text-white" : "bg-white/[0.03] border-white/10 text-muted hover:border-white/25"
                       }`}>{m}</div>
                     </label>
                   ))}
@@ -187,7 +199,7 @@ export default function AnalyzePage() {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-2.5 bg-accent hover:bg-accent-600 rounded-xl font-medium flex items-center justify-center gap-2 transition-[background-color,transform] duration-150 active:translate-y-px focus-ring"
               >
                 Lanjut Step 2 <ArrowRight size={18} />
               </button>
@@ -197,7 +209,7 @@ export default function AnalyzePage() {
           {/* Step 2: Team & Capital */}
           {step === 2 && (
             <div className="glass-card rounded-2xl p-6 space-y-5">
-              <h2 className="text-lg font-bold text-blue-400">Step 2: Tim & Modal</h2>
+              <h2 className="text-base font-semibold text-fg mb-1">Langkah 2: Tim & Modal</h2>
 
               <div>
                 <label className={labelCls}>Modal Awal *</label>
@@ -215,7 +227,7 @@ export default function AnalyzePage() {
                     <label key={r} className="cursor-pointer">
                       <input type="radio" value={r} {...register("readinessLevel")} className="sr-only" />
                       <div className={`text-center py-2.5 rounded-lg border text-sm font-medium transition-colors ${
-                        watch("readinessLevel") === r ? "bg-blue-600 border-blue-500 text-white" : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
+                        watch("readinessLevel") === r ? "bg-accent border-accent text-white" : "bg-white/[0.03] border-white/10 text-muted hover:border-white/25"
                       }`}>{r}</div>
                     </label>
                   ))}
@@ -232,8 +244,8 @@ export default function AnalyzePage() {
                       onClick={() => toggleArray("teamExpertise", e)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
                         selectedExpertise.includes(e)
-                          ? "bg-purple-600 border-purple-500 text-white"
-                          : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
+                          ? "bg-accent border-accent text-white"
+                          : "bg-white/[0.03] border-white/10 text-muted hover:border-white/25"
                       }`}
                     >{e}</button>
                   ))}
@@ -248,7 +260,7 @@ export default function AnalyzePage() {
                     <label key={r} className="flex-1 cursor-pointer">
                       <input type="radio" value={r} {...register("riskProfile")} className="sr-only" />
                       <div className={`text-center py-3 rounded-lg border text-sm font-medium transition-colors ${
-                        watch("riskProfile") === r ? "bg-blue-600 border-blue-500 text-white" : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
+                        watch("riskProfile") === r ? "bg-accent border-accent text-white" : "bg-white/[0.03] border-white/10 text-muted hover:border-white/25"
                       }`}>{r}</div>
                     </label>
                   ))}
@@ -265,8 +277,8 @@ export default function AnalyzePage() {
                       onClick={() => toggleArray("dynamicScenarios", s)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                         selectedScenarios.includes(s)
-                          ? "bg-green-600 border-green-500 text-white"
-                          : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"
+                          ? "bg-accent/80 border-accent/60 text-white"
+                          : "bg-white/[0.03] border-white/10 text-muted hover:border-white/25"
                       }`}
                     >{s}</button>
                   ))}
@@ -275,11 +287,11 @@ export default function AnalyzePage() {
 
               <div className="flex gap-3">
                 <button type="button" onClick={() => setStep(1)}
-                  className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors">
+                  className="flex-1 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl font-medium text-muted hover:text-fg flex items-center justify-center gap-2 transition-colors duration-150 active:translate-y-px focus-ring">
                   <ArrowLeft size={18} /> Kembali
                 </button>
                 <button type="button" onClick={() => setStep(3)}
-                  className="flex-1 py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors">
+                  className="flex-1 py-2.5 bg-accent hover:bg-accent-600 rounded-xl font-medium flex items-center justify-center gap-2 transition-[background-color,transform] duration-150 active:translate-y-px focus-ring">
                   Lanjut Step 3 <ArrowRight size={18} />
                 </button>
               </div>
@@ -289,12 +301,12 @@ export default function AnalyzePage() {
           {/* Step 3: Description & Submit */}
           {step === 3 && (
             <div className="glass-card rounded-2xl p-6 space-y-5">
-              <h2 className="text-lg font-bold text-blue-400">Step 3: Deskripsi Ide</h2>
+              <h2 className="text-base font-semibold text-fg mb-1">Langkah 3: Deskripsi Ide</h2>
 
               <div>
                 <div className="flex justify-between mb-2">
                   <label className={labelCls + " mb-0"}>Deskripsi Ide Startup *</label>
-                  <span className={`text-xs ${descText.length < 50 ? "text-red-400" : "text-gray-500"}`}>
+                  <span className={`text-xs tnum ${descText.length < 50 ? "text-rose-400" : "text-faint"}`}>
                     {descText.length}/2000
                   </span>
                 </div>
@@ -308,20 +320,20 @@ export default function AnalyzePage() {
               </div>
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 text-red-400 text-sm">
+                <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-4 text-rose-300 text-sm">
                   {error}
                 </div>
               )}
 
               <div className="flex gap-3">
                 <button type="button" onClick={() => setStep(2)}
-                  className="flex-1 py-3 bg-gray-800 hover:bg-gray-700 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors">
+                  className="flex-1 py-2.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl font-medium text-muted hover:text-fg flex items-center justify-center gap-2 transition-colors duration-150 active:translate-y-px focus-ring">
                   <ArrowLeft size={18} /> Kembali
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 disabled:opacity-50 rounded-xl font-semibold flex items-center justify-center gap-2 transition-opacity"
+                  className="flex-1 py-2.5 bg-accent hover:bg-accent-600 disabled:opacity-40 rounded-xl font-medium flex items-center justify-center gap-2 transition-[background-color,transform] duration-150 active:translate-y-px focus-ring"
                 >
                   {isSubmitting ? (
                     <><Loader2 size={18} className="animate-spin" /> Memulai Analisis...</>

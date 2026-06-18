@@ -29,7 +29,7 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
   return (
     <div className="glass-card rounded-2xl p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Rekomendasi Strategis</h2>
+        <h2 className="text-base font-semibold">Rekomendasi Strategis</h2>
         <span className={`px-4 py-1.5 rounded-full text-sm font-bold border ${goColor}`}>
           {goIcon} {goNogo}
         </span>
@@ -37,17 +37,17 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
 
       {/* Go/No-Go Reasoning */}
       {rec.go_nogo_reasoning && (
-        <div className="p-4 bg-gray-800/60 rounded-xl border border-gray-700/40">
-          <p className="text-xs font-bold text-gray-400 mb-1">Alasan Keputusan</p>
-          <p className="text-sm text-gray-200">{toText(rec.go_nogo_reasoning)}</p>
+        <div className="p-4 bg-white/[0.03] rounded-xl border border-white/[0.06]">
+          <p className="text-[11px] font-semibold text-faint mb-1">Alasan Keputusan</p>
+          <p className="text-sm text-fg">{toText(rec.go_nogo_reasoning)}</p>
         </div>
       )}
 
       {/* Executive Summary */}
       {rec.executive_summary && (
-        <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl">
-          <p className="text-sm font-bold text-blue-400 mb-2">Executive Summary</p>
-          <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+        <div className="p-4 bg-accent/[0.04] border border-accent/20 rounded-xl">
+          <p className="text-sm font-semibold text-accent-fg mb-2">Executive Summary</p>
+          <div className="text-sm text-muted leading-relaxed whitespace-pre-line">
             {toText(rec.executive_summary)}
           </div>
         </div>
@@ -84,7 +84,7 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
       {/* Strategic Recommendations */}
       {recs.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold text-gray-200 mb-4">Rekomendasi Aksi</h3>
+          <h3 className="text-sm font-semibold text-fg mb-4">Rekomendasi Aksi</h3>
           <div className="space-y-2">
             {recs.map((r, i) => {
               const isHigh = r.toLowerCase().includes("kritis") || r.toLowerCase().includes("prioritas 1");
@@ -93,15 +93,15 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
                 ? "bg-red-500/20 text-red-400 border-red-500/30"
                 : isMed
                 ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-                : "bg-blue-500/20 text-blue-400 border-blue-500/30";
+                : "bg-accent/10 text-accent-fg border-accent/20";
               const badgeLabel = isHigh ? "KRITIS" : isMed ? "TINGGI" : "SEDANG";
               return (
-                <div key={i} className="border border-gray-700/50 rounded-xl p-4 bg-gray-800/30">
+                <div key={i} className="border border-white/[0.06] rounded-xl p-4 bg-white/[0.02]">
                   <div className="flex items-start gap-3">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded border shrink-0 mt-0.5 ${badgeCls}`}>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border shrink-0 mt-0.5 ${badgeCls}`}>
                       {badgeLabel}
                     </span>
-                    <p className="text-sm text-gray-200">{r}</p>
+                    <p className="text-sm text-fg">{r}</p>
                   </div>
                 </div>
               );
@@ -112,12 +112,12 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
 
       {/* Next Steps */}
       {nextSteps.length > 0 && (
-        <div className="p-4 bg-purple-500/5 border border-purple-500/20 rounded-xl">
-          <p className="text-sm font-bold text-purple-400 mb-3">Langkah Berikutnya</p>
+        <div className="p-4 bg-violet-500/[0.04] border border-violet-500/20 rounded-xl">
+          <p className="text-sm font-semibold text-violet-400 mb-3">Langkah Berikutnya</p>
           <div className="space-y-2">
             {nextSteps.map((step, i) => (
-              <div key={i} className="flex gap-2 text-sm text-gray-300">
-                <span className="text-purple-400 font-bold shrink-0">{i + 1}.</span>{step}
+              <div key={i} className="flex gap-2 text-sm text-muted">
+                <span className="text-violet-400 font-semibold shrink-0">{i + 1}.</span>{step}
               </div>
             ))}
           </div>
@@ -146,8 +146,8 @@ export function RecommendationPanel({ rec }: { rec: AnalysisResult["recommendati
 
       {/* Comparable Successes */}
       {toText(rec.comparable_successes) && (
-        <div className="text-xs text-gray-500 border-t border-gray-700/50 pt-4">
-          <span className="text-gray-400 font-medium">Benchmark: </span>{toText(rec.comparable_successes)}
+        <div className="text-xs text-gray-500 border-t border-white/[0.06] pt-4">
+          <span className="text-muted font-medium">Benchmark: </span>{toText(rec.comparable_successes)}
         </div>
       )}
     </div>

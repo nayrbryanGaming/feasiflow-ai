@@ -134,15 +134,15 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
 
   return (
     <div className="glass-card rounded-2xl p-6 sticky top-6">
-      <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
+      <h3 className="font-semibold text-sm mb-5 flex items-center gap-2">
         <span>Progress Analisis</span>
-        <span className="ml-auto text-blue-400 text-sm font-mono">{overallProgress}%</span>
+        <span className="ml-auto text-accent-fg text-sm font-mono tnum">{overallProgress}%</span>
       </h3>
 
       {/* Progress bar */}
-      <div className="h-2 bg-gray-700 rounded-full overflow-hidden mb-6">
+      <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden mb-6">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500"
+          className="h-full bg-accent rounded-full transition-all duration-500"
           style={{ width: `${overallProgress}%` }}
         />
       </div>
@@ -154,9 +154,9 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
             <Loader2 size={14} className="animate-spin" /> Antrian — menunggu giliran…
           </p>
           {queuePos != null && (
-            <p className="text-gray-400 text-xs mt-1">Perkiraan posisi: #{queuePos}</p>
+            <p className="text-muted text-xs mt-1">Perkiraan posisi: #{queuePos}</p>
           )}
-          <p className="text-gray-500 text-[11px] mt-1">
+          <p className="text-faint text-[11px] mt-1">
             Analisis dimulai otomatis saat slot tersedia.
           </p>
         </div>
@@ -179,28 +179,28 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
                   ? "bg-green-500/5 border-green-500/20"
                   : status === "error"
                   ? "bg-red-500/10 border-red-500/30"
-                  : "bg-gray-800/40 border-gray-700/30"
+                  : "bg-white/[0.02] border-white/[0.06]"
               }`}
             >
               <div className="w-5 h-5 flex-shrink-0">
-                {status === "waiting" && <Circle size={20} className="text-gray-600" />}
-                {status === "running" && <Loader2 size={20} className="text-blue-400 animate-spin" />}
+                {status === "waiting" && <Circle size={20} className="text-faint" />}
+                {status === "running" && <Loader2 size={20} className="text-accent-fg animate-spin" />}
                 {status === "done" && <CheckCircle size={20} className="text-green-400" />}
                 {status === "error" && <AlertCircle size={20} className="text-red-400" />}
               </div>
               <span className={`flex-1 text-sm font-medium ${
-                status === "running" ? "text-blue-300 agent-running" :
-                status === "done" ? "text-green-300" :
-                status === "error" ? "text-red-300" :
-                "text-gray-500"
+                status === "running" ? "text-accent-fg agent-running" :
+                status === "done" ? "text-emerald-400" :
+                status === "error" ? "text-rose-400" :
+                "text-faint"
               }`}>{label}</span>
               {elapsed != null && (
-                <span className="text-xs text-gray-500 flex items-center gap-1">
+                <span className="text-xs text-faint flex items-center gap-1 tnum">
                   <Clock size={11} />{formatElapsed(elapsed)}
                 </span>
               )}
               {tokens != null && tokens > 0 && (
-                <span className="text-[10px] text-gray-600">{tokens}t</span>
+                <span className="text-[10px] text-faint tnum">{tokens}t</span>
               )}
             </div>
           );
@@ -210,15 +210,15 @@ export function LiveMonitor({ sessionId, onComplete }: Props) {
       {isComplete && (
         <div className="mt-5 p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-center">
           <p className="text-green-400 font-semibold text-sm">Analisis Selesai!</p>
-          <p className="text-gray-400 text-xs mt-1">Scroll ke bawah untuk laporan lengkap</p>
+          <p className="text-muted text-xs mt-1">Scroll ke bawah untuk laporan lengkap</p>
         </div>
       )}
 
       {hasError && !isComplete && (
         <div className="mt-5 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
           <p className="text-red-400 font-semibold text-sm">Error</p>
-          {errorMsg && <p className="text-gray-400 text-xs mt-1">{errorMsg}</p>}
-          <a href="/analyze" className="mt-2 inline-block text-xs text-blue-400 underline">
+          {errorMsg && <p className="text-muted text-xs mt-1">{errorMsg}</p>}
+          <a href="/analyze" className="mt-2 inline-block text-xs text-accent-fg underline">
             Mulai Analisis Baru
           </a>
         </div>
